@@ -42,7 +42,7 @@
 
     <!-- SweetAlert2 Delete Confirmation Script -->
     <script>
-        function confirmDelete(formId) {
+        function confirmDelete(id) {
             Swal.fire({
                 title: "Are you sure?",
                 text: "You won't be able to revert this!",
@@ -53,11 +53,8 @@
                 confirmButtonText: "Yes, delete it!"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    Swal.fire({
-                        title: "Deleted!",
-                        text: "Your file has been deleted.",
-                        icon: "success"
-                    });
+                    // Submit the delete form
+                    document.getElementById('delete-form-' + id).submit();
                 }
             });
         }

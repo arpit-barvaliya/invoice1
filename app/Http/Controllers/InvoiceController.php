@@ -95,7 +95,12 @@ class InvoiceController extends Controller
 
     public function destroy(Invoice $invoice)
     {
-        $invoice->delete();
+        // Delete related invoice services first
+        $invoice->services()->delete();
+        
+        // Force delete the invoice
+        $invoice->forceDelete();
+        
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
     }
