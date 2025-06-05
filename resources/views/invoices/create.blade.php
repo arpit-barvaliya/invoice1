@@ -39,27 +39,10 @@
                             </div>
 
                             <div>
-                                <x-input-label for="tax_rate" value="Tax Rate (%)" />
-                                <x-text-input id="tax_rate" name="tax_rate" type="number" class="mt-1 block w-full" :value="old('tax_rate', 0)" min="0" max="100" step="0.01" required />
-                                <x-input-error :messages="$errors->get('tax_rate')" class="mt-2" />
+                                <x-input-label for="invoice_number" value="Invoice Number" />
+                                <x-text-input id="invoice_number" name="invoice_number" type="text" class="mt-1 block w-full" :value="old('invoice_number')" required />
+                                <x-input-error :messages="$errors->get('invoice_number')" class="mt-2" />
                             </div>
-
-                            <div>
-                                <x-input-label for="status" value="Status" />
-                                <select name="status" id="status" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
-                                    <option value="draft" {{ old('status') == 'draft' ? 'selected' : '' }}>Draft</option>
-                                    <option value="sent" {{ old('status') == 'sent' ? 'selected' : '' }}>Sent</option>
-                                    <option value="paid" {{ old('status') == 'paid' ? 'selected' : '' }}>Paid</option>
-                                    <option value="overdue" {{ old('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
-                                </select>
-                                <x-input-error :messages="$errors->get('status')" class="mt-2" />
-                            </div>
-                        </div>
-
-                        <div>
-                            <x-input-label for="notes" value="Notes" />
-                            <textarea id="notes" name="notes" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('notes') }}</textarea>
-                            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                         </div>
 
                         <div class="flex justify-end">

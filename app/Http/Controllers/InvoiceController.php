@@ -9,6 +9,7 @@ use App\Models\InvoiceService;
 use App\Models\Company;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InvoiceController extends Controller
 {
@@ -21,7 +22,7 @@ class InvoiceController extends Controller
     public function create()
     {
         $customers = Customer::all();
-        $services = Service::where('is_active', true)->get();
+        $services = Service::all();
         return view('invoices.create', compact('customers', 'services'));
     }
 
@@ -31,23 +32,14 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
-            'tax_rate' => 'required|numeric|min:0|max:100',
-            'notes' => 'nullable|string|max:1000',
-            'status' => 'required|in:draft,sent,paid,overdue'
+            'invoice_number' => 'required|string|unique:invoices,invoice_number'
         ]);
 
-        // Generate invoice number
-        $lastInvoice = Invoice::latest()->first();
-        $invoiceNumber = 'INV-' . str_pad(($lastInvoice ? $lastInvoice->id + 1 : 1), 6, '0', STR_PAD_LEFT);
-
         $invoice = Invoice::create([
-            'invoice_number' => $invoiceNumber,
+            'invoice_number' => $validated['invoice_number'],
             'customer_id' => $validated['customer_id'],
             'invoice_date' => $validated['invoice_date'],
             'due_date' => $validated['due_date'],
-            'tax_rate' => $validated['tax_rate'],
-            'notes' => $validated['notes'],
-            'status' => $validated['status'],
             'subtotal' => 0,
             'tax_amount' => 0,
             'total' => 0
@@ -67,7 +59,7 @@ class InvoiceController extends Controller
     public function edit(Request $request, Invoice $invoice)
     {
         $customers = Customer::all();
-        $services = Service::where('is_active', true)->get();
+        $services = Service::all();
         
         // Check if we're editing a specific service
         $invoiceService = null;
@@ -84,9 +76,7 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
-            'tax_rate' => 'required|numeric|min:0|max:100',
-            'notes' => 'nullable|string|max:1000',
-            'status' => 'required|in:draft,sent,paid,overdue'
+            'invoice_number' => 'required|string|unique:invoices,invoice_number,' . $invoice->id
         ]);
 
         $invoice->update($validated);
@@ -105,5 +95,15 @@ class InvoiceController extends Controller
         
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
+    }
+
+    public function downloadPdf(Invoice $invoice)
+    {
+        $company = Company::first();
+        $invoice->load(['customer', 'services.service']);
+        
+        $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'company'));
+        
+        return $pdf->download('invoice-' . $invoice->invoice_number . '.pdf');
     }
 }

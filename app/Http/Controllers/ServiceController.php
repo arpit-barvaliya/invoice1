@@ -20,13 +20,7 @@ class ServiceController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'rate' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateService($request);
 
         Service::create($validated);
 
@@ -46,13 +40,7 @@ class ServiceController extends Controller
 
     public function update(Request $request, Service $service)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'rate' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:50',
-            'is_active' => 'boolean'
-        ]);
+        $validated = $this->validateService($request);
 
         $service->update($validated);
 
@@ -66,5 +54,16 @@ class ServiceController extends Controller
 
         return redirect()->route('services.index')
             ->with('success', 'Service deleted successfully.');
+    }
+
+    protected function validateService(Request $request)
+    {
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'rate' => 'required|numeric|min:0',
+            'cgst_rate' => 'required|numeric|min:0|max:100',
+            'sgst_rate' => 'required|numeric|min:0|max:100',
+            'igst_rate' => 'required|numeric|min:0|max:100'
+        ]);
     }
 }

@@ -17,12 +17,12 @@ return new class extends Migration
             $table->foreignId('customer_id')->constrained()->onDelete('cascade');
             $table->date('invoice_date');
             $table->date('due_date');
-            $table->decimal('subtotal', 10, 2);
+            $table->decimal('subtotal', 10, 2)->default(0);
             $table->decimal('tax_rate', 5, 2)->default(0);
             $table->decimal('tax_amount', 10, 2)->default(0);
-            $table->decimal('total', 10, 2);
+            $table->decimal('total', 10, 2)->default(0);
             $table->text('notes')->nullable();
-            $table->string('status')->default('draft'); // draft, sent, paid, cancelled
+            $table->enum('status', ['draft', 'sent', 'paid', 'overdue'])->default('draft');
             $table->timestamps();
             $table->softDeletes();
         });

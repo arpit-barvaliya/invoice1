@@ -92,12 +92,14 @@
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
 
-                            <!-- Notes -->
-                            <div class="col-span-2">
-                                <x-input-label for="notes" :value="__('Notes')" />
-                                <x-text-input id="notes" type="text" name="notes" :value="old('notes', $customer->notes)" class="mt-1 block w-full" />
-                                <x-input-error class="mt-2" :messages="$errors->get('notes')" />
+                            <!-- Credit Days -->
+                            <div>
+                                <x-input-label for="credit_days" :value="__('Credit Days')" />
+                                <x-text-input id="credit_days" type="number" name="credit_days" :value="old('credit_days', $customer->credit_days)" class="mt-1 block w-full" min="0" required />
+                                <x-input-error class="mt-2" :messages="$errors->get('credit_days')" />
                             </div>
+
+                           
                         </div>
 
                         <div class="flex items-center justify-end mt-6">

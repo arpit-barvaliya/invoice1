@@ -71,12 +71,11 @@ class InvoiceServiceController extends Controller
     private function updateInvoiceTotals(Invoice $invoice)
     {
         $subtotal = $invoice->services()->sum('amount');
-        $taxAmount = $subtotal * ($invoice->tax_rate / 100);
-        $total = $subtotal + $taxAmount;
+        $total = $subtotal;
 
         $invoice->update([
             'subtotal' => $subtotal,
-            'tax_amount' => $taxAmount,
+            'tax_amount' => 0,
             'total' => $total
         ]);
     }

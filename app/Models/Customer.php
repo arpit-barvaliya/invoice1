@@ -27,6 +27,7 @@ class Customer extends Model
         'notes',
         'gst',
         'state_code',
-        'place_of_supply'
+        'place_of_supply',
+        'credit_days'
     ];
 }

@@ -27,34 +27,30 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('rate')" />
                             </div>
 
-                            <!-- Unit -->
-                            <div>
-                                <x-input-label for="unit" :value="__('Unit')" />
-                                <x-text-input id="unit" type="text" name="unit" :value="old('unit')" class="mt-1 block w-full" required placeholder="e.g., hour, day, piece" />
-                                <x-input-error class="mt-2" :messages="$errors->get('unit')" />
-                            </div>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <x-input-label for="cgst_rate" :value="__('CGST Rate (%)')" />
+                                    <x-text-input id="cgst_rate" type="number" name="cgst_rate" :value="old('cgst_rate', 0)" class="mt-1 block w-full" min="0" max="100" step="0.01" required />
+                                    <x-input-error class="mt-2" :messages="$errors->get('cgst_rate')" />
+                                </div>
 
-                            <!-- Is Active -->
-                            <div>
-                                <x-input-label for="is_active" :value="__('Status')" />
-                                <select id="is_active" name="is_active" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
-                                    <option value="1" {{ old('is_active') ? 'selected' : '' }}>Active</option>
-                                    <option value="0" {{ old('is_active') === '0' ? 'selected' : '' }}>Inactive</option>
-                                </select>
-                                <x-input-error class="mt-2" :messages="$errors->get('is_active')" />
-                            </div>
+                                <div>
+                                    <x-input-label for="sgst_rate" :value="__('SGST Rate (%)')" />
+                                    <x-text-input id="sgst_rate" type="number" name="sgst_rate" :value="old('sgst_rate', 0)" class="mt-1 block w-full" min="0" max="100" step="0.01" required />
+                                    <x-input-error class="mt-2" :messages="$errors->get('sgst_rate')" />
+                                </div>
 
-                            <!-- Description -->
-                            <div class="col-span-2">
-                                <x-input-label for="description" :value="__('Description')" />
-                                <textarea id="description" name="description" rows="4" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description') }}</textarea>
-                                <x-input-error class="mt-2" :messages="$errors->get('description')" />
+                                <div>
+                                    <x-input-label for="igst_rate" :value="__('IGST Rate (%)')" />
+                                    <x-text-input id="igst_rate" type="number" name="igst_rate" :value="old('igst_rate', 0)" class="mt-1 block w-full" min="0" max="100" step="0.01" required />
+                                    <x-input-error class="mt-2" :messages="$errors->get('igst_rate')" />
+                                </div>
                             </div>
                         </div>
 
                         <div class="flex items-center justify-end mt-6">
                             <x-primary-button>
-                                {{ __('Add Service') }}
+                                {{ __('submit') }}
                             </x-primary-button>
                         </div>
                     </form>

@@ -12,14 +12,16 @@ class Service extends Model
 
     protected $fillable = [
         'name',
-        'description',
         'rate',
-        'unit',
-        'is_active'
+        'cgst_rate',
+        'sgst_rate',
+        'igst_rate'
     ];
 
     protected $casts = [
         'rate' => 'decimal:2',
-        'is_active' => 'boolean'
+        'cgst_rate' => 'decimal:2',
+        'sgst_rate' => 'decimal:2',
+        'igst_rate' => 'decimal:2',
     ];
 }

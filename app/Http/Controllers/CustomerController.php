@@ -70,7 +70,7 @@ class CustomerController extends Controller
             'gst' => 'nullable|string|max:20',
             'state_code' => 'nullable|string|max:10',
             'place_of_supply' => 'nullable|string|max:255',
-            'notes' => 'nullable|string'
+            'credit_days' => 'required|integer|min:0'
         ]);
     }
 }

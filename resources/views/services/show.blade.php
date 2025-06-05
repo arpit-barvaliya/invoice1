@@ -36,28 +36,19 @@
                                     <dd class="mt-1 text-sm text-gray-900">{{ number_format($service->rate, 2) }}</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">{{ __('Unit') }}</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $service->unit }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500">{{ __('CGST Rate') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ number_format($service->cgst_rate, 2) }}%</dd>
                                 </div>
                                 <div>
-                                    <dt class="text-sm font-medium text-gray-500">{{ __('Status') }}</dt>
-                                    <dd class="mt-1">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $service->is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ $service->is_active ? __('Active') : __('Inactive') }}
-                                        </span>
-                                    </dd>
+                                    <dt class="text-sm font-medium text-gray-500">{{ __('SGST Rate') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ number_format($service->sgst_rate, 2) }}%</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-sm font-medium text-gray-500">{{ __('IGST Rate') }}</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">{{ number_format($service->igst_rate, 2) }}%</dd>
                                 </div>
                             </dl>
                         </div>
-
-                        @if($service->description)
-                            <div>
-                                <h3 class="text-lg font-medium text-gray-900">{{ __('Description') }}</h3>
-                                <div class="mt-4 text-sm text-gray-900">
-                                    {{ $service->description }}
-                                </div>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>

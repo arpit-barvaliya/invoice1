@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('gst')->nullable();
             $table->string('state_code')->nullable();
             $table->string('place_of_supply')->nullable();
-            $table->text('notes')->nullable();
+            $table->integer('credit_days')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

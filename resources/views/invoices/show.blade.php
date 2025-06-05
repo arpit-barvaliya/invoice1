@@ -8,6 +8,9 @@
                 <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                     {{ __('Edit Invoice') }}
                 </a>
+                <a href="{{ route('invoices.pdf', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                    {{ __('Download PDF') }}
+                </a>
                 <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
                     @csrf
                     @method('DELETE')
@@ -114,10 +117,6 @@
                                     <tr>
                                         <td colspan="5" class="px-10 py-1 text-right font-medium text-gray-500">Subtotal:</td>
                                         <td class="px-6 py-4 whitespace-nowrap font-medium text-right">{{ number_format($invoice->subtotal, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-4 text-right font-medium text-gray-500">Tax ({{ $invoice->tax_rate }}%):</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-right">{{ number_format($invoice->tax_amount, 2) }}</td>
                                     </tr>
                                     <tr>
                                         <td colspan="5" class="px-6 py-4 text-right font-medium text-gray-900">Total:</td>
