@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\Customer;
 use App\Models\Service;
 use App\Models\InvoiceService;
+use App\Models\Company;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -58,8 +59,9 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
+        $company = Company::first();
         $invoice->load(['customer', 'services.service']);
-        return view('invoices.show', compact('invoice'));
+        return view('invoices.show', compact('invoice', 'company'));
     }
 
     public function edit(Request $request, Invoice $invoice)

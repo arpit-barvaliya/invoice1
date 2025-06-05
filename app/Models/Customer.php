@@ -25,5 +25,8 @@ class Customer extends Model
         'country',
         'postal_code',
         'notes',
+        'gst',
+        'state_code',
+        'place_of_supply'
     ];
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceServiceController;
+use App\Http\Controllers\CompanyController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -67,6 +68,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/invoices/{invoice}/services', [InvoiceServiceController::class, 'store'])->name('invoice-services.store');
     Route::put('/invoices/{invoice}/services/{invoiceService}', [InvoiceServiceController::class, 'update'])->name('invoice-services.update');
     Route::delete('/invoices/{invoice}/services/{invoiceService}', [InvoiceServiceController::class, 'destroy'])->name('invoice-services.destroy');
+
+    Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
+    Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
 });
 
 require __DIR__.'/auth.php';

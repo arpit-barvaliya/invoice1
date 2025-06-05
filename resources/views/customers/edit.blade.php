@@ -38,7 +38,8 @@
                             <!-- Address -->
                             <div>
                                 <x-input-label for="address" :value="__('Address')" />
-                                <x-text-input id="address" type="text" name="address" :value="old('address', $customer->address)" class="mt-1 block w-full" autocomplete="address" />
+                                <textarea id="address" name="address" rows="3" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">{{ old('address', $customer->address) }}</textarea>
                                 <x-input-error class="mt-2" :messages="$errors->get('address')" />
                             </div>
 
@@ -68,6 +69,27 @@
                                 <x-input-label for="postal_code" :value="__('Postal Code')" />
                                 <x-text-input id="postal_code" type="text" name="postal_code" :value="old('postal_code', $customer->postal_code)" class="mt-1 block w-full" autocomplete="postal_code" />
                                 <x-input-error class="mt-2" :messages="$errors->get('postal_code')" />
+                            </div>
+
+                            <!-- GST Number -->
+                            <div>
+                                <label for="gst" class="block text-sm font-medium text-gray-700">GST Number</label>
+                                <input type="text" name="gst" id="gst" value="{{ old('gst', $customer->gst) }}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            <!-- State Code -->
+                            <div>
+                                <label for="state_code" class="block text-sm font-medium text-gray-700">State Code</label>
+                                <input type="text" name="state_code" id="state_code" value="{{ old('state_code', $customer->state_code) }}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Place of Supply -->
+                            <div>
+                                <label for="place_of_supply" class="block text-sm font-medium text-gray-700">Place of Supply</label>
+                                <input type="text" name="place_of_supply" id="place_of_supply" value="{{ old('place_of_supply', $customer->place_of_supply) }}"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                             </div>
 
                             <!-- Notes -->

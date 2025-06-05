@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('state')->nullable();
             $table->string('country')->nullable();
             $table->string('postal_code')->nullable();
+            $table->string('gst')->nullable();
+            $table->string('state_code')->nullable();
+            $table->string('place_of_supply')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
             $table->softDeletes();
