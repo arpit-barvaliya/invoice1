@@ -107,6 +107,12 @@
             font-size: 10px;
             color: #666;
         }
+        .amount-in-words {
+            margin-top: 10px;
+            font-style: italic;
+            color: #4B5563; /* Tailwind gray-600 */
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
@@ -212,6 +218,9 @@
                 <td align="right">{{ number_format($invoice->total, 2) }}</td>
             </tr>
         </table>
+        <div class="amount-in-words">
+            Amount in words: {{ ucwords(App\Helpers\NumberToWords::convert($invoice->total)) }} Rupees Only
+        </div>
     </div>
 
     @if($invoice->notes)
