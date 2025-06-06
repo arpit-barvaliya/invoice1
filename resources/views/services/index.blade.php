@@ -25,6 +25,7 @@
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Name') }}</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('HSN') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('Rate') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('CGST') }}</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ __('SGST') }}</th>
@@ -36,6 +37,7 @@
                                 @forelse ($services as $service)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $service->name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $service->hsn }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->rate, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->cgst_rate, 2) }}%</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->sgst_rate, 2) }}%</td>

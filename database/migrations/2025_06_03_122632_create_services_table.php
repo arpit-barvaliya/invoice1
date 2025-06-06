@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('services', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('hsn')->nullable();
             $table->decimal('rate', 10, 2);
             $table->decimal('cgst_rate', 5, 2)->default(0);
             $table->decimal('sgst_rate', 5, 2)->default(0);

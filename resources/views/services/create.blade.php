@@ -20,6 +20,13 @@
                                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             </div>
 
+                            <!-- HSN -->
+                            <div>
+                                <x-input-label for="hsn" :value="__('HSN Code')" />
+                                <x-text-input id="hsn" type="text" name="hsn" :value="old('hsn')" class="mt-1 block w-full" />
+                                <x-input-error class="mt-2" :messages="$errors->get('hsn')" />
+                            </div>
+
                             <!-- Rate -->
                             <div>
                                 <x-input-label for="rate" :value="__('Rate')" />

@@ -5,19 +5,12 @@
                 {{ __('Invoice Details') }}
             </h2>
             <div class="flex space-x-4">
-                <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                     {{ __('Edit Invoice') }}
                 </a>
-                <a href="{{ route('invoices.pdf', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                <a href="{{ route('invoices.pdf', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
                     {{ __('Download PDF') }}
                 </a>
-                <form action="{{ route('invoices.destroy', $invoice) }}" method="POST" class="inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 focus:bg-red-700 active:bg-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition ease-in-out duration-150" onclick="return confirm('Are you sure you want to delete this invoice?')">
-                        {{ __('Delete Invoice') }}
-                    </button>
-                </form>
             </div>
         </div>
     </x-slot>
@@ -26,18 +19,23 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <!-- Invoice Header -->
-                    <div class="mb-8 border-b pb-6">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h4 class="text-lg font-semibold text-gray-900">INVOICE</h4>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-sm text-gray-600">Invoice No: {{ $invoice->invoice_number }}</p>
-                                <p class="text-sm text-gray-600 mt-2">Invoice Date: {{ $invoice->invoice_date->format('F j, Y') }}</p>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Invoice Date</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $invoice->invoice_date->format('Y-m-d') }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Due Date</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $invoice->due_date->format('Y-m-d') }}</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Invoice Number</label>
+                            <p class="mt-1 text-sm text-gray-900">{{ $invoice->invoice_number }}</p>
                         </div>
                     </div>
+                    <br>
 
                     <!-- Company and Customer Details -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -82,186 +80,73 @@
                         </div>
                     </div>
 
-                    <!-- Services Table -->
                     <div class="mt-8">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4">Services</h3>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sr. No.</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">Service</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">HSN</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Quantity</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">CGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">SGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">IGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Discount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Scheme Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Basic Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">GST Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @forelse($invoice->services as $index => $service)
+                                    @forelse($invoice->services as $service)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ $index + 1 }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ $service->service->name }}</td>
-                                            <td class="px-6 py-4">{{ $service->description }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ $service->quantity }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ $service->service->hsn }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->rate, 2) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ $service->quantity }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->cgst_rate, 2) }}%</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->sgst_rate, 2) }}%</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->igst_rate, 2) }}%</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->discount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->scheme_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->basic_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->gst_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->total_amount, 2) }}</td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">No services added to this invoice.</td>
+                                            <td colspan="12" class="px-6 py-4 text-center text-gray-500">
+                                                {{ __('No services found.') }}
+                                            </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
-                                <tfoot class="bg-gray-50">
-                                    <tr>
-                                        <td colspan="5" class="px-10 py-1 text-right font-medium text-gray-500">Subtotal:</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-right">{{ number_format($invoice->subtotal, 2) }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="5" class="px-6 py-4 text-right font-medium text-gray-900">Total:</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900 text-right">{{ number_format($invoice->total, 2) }}</td>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
-                    </div>
 
-                    {{-- Total in Words and Bank Details --}}
-                    <div class="mt-8">
-                        <div class="text-right">
-                            @php
-                                function numberToWords($number) {
-                                    $hyphen      = '-';
-                                    $conjunction = ' and ';
-                                    $separator   = ', ';
-                                    $negative    = 'negative ';
-                                    $decimal     = ' point ';
-                                    $dictionary  = [
-                                        0 => 'zero',
-                                        1 => 'one',
-                                        2 => 'two',
-                                        3 => 'three',
-                                        4 => 'four',
-                                        5 => 'five',
-                                        6 => 'six',
-                                        7 => 'seven',
-                                        8 => 'eight',
-                                        9 => 'nine',
-                                        10 => 'ten',
-                                        11 => 'eleven',
-                                        12 => 'twelve',
-                                        13 => 'thirteen',
-                                        14 => 'fourteen',
-                                        15 => 'fifteen',
-                                        16 => 'sixteen',
-                                        17 => 'seventeen',
-                                        18 => 'eighteen',
-                                        19 => 'nineteen',
-                                        20 => 'twenty',
-                                        30 => 'thirty',
-                                        40 => 'forty',
-                                        50 => 'fifty',
-                                        60 => 'sixty',
-                                        70 => 'seventy',
-                                        80 => 'eighty',
-                                        90 => 'ninety',
-                                        100 => 'hundred',
-                                        1000 => 'thousand',
-                                        100000 => 'lakh',
-                                        10000000 => 'crore'
-                                    ];
-                                    if (!is_numeric($number)) {
-                                        return false;
-                                    }
-                                    if (($number >= 0 && (int) $number < 0) || (int) $number < 0 - PHP_INT_MAX) {
-                                        // overflow
-                                        return false;
-                                    }
-                                    if ($number < 0) {
-                                        return $negative . numberToWords(abs($number));
-                                    }
-                                    $string = $fraction = null;
-                                    if (strpos($number, '.') !== false) {
-                                        list($number, $fraction) = explode('.', $number);
-                                    }
-                                    switch (true) {
-                                        case $number < 21:
-                                            $string = $dictionary[$number];
-                                            break;
-                                        case $number < 100:
-                                            $tens   = ((int) ($number / 10)) * 10;
-                                            $units  = $number % 10;
-                                            $string = $dictionary[$tens];
-                                            if ($units) {
-                                                $string .= $hyphen . $dictionary[$units];
-                                            }
-                                            break;
-                                        case $number < 1000:
-                                            $hundreds  = (int) ($number / 100);
-                                            $remainder = $number % 100;
-                                            $string = $dictionary[$hundreds] . ' ' . $dictionary[100];
-                                            if ($remainder) {
-                                                $string .= $conjunction . numberToWords($remainder);
-                                            }
-                                            break;
-                                        case $number < 100000:
-                                            $thousands   = (int) ($number / 1000);
-                                            $remainder = $number % 1000;
-                                            $string = numberToWords($thousands) . ' ' . $dictionary[1000];
-                                            if ($remainder) {
-                                                $string .= $separator . numberToWords($remainder);
-                                            }
-                                            break;
-                                        case $number < 10000000:
-                                            $lakhs   = (int) ($number / 100000);
-                                            $remainder = $number % 100000;
-                                            $string = numberToWords($lakhs) . ' ' . $dictionary[100000];
-                                            if ($remainder) {
-                                                $string .= $separator . numberToWords($remainder);
-                                            }
-                                            break;
-                                        default:
-                                            $crores   = (int) ($number / 10000000);
-                                            $remainder = $number % 10000000;
-                                            $string = numberToWords($crores) . ' ' . $dictionary[10000000];
-                                            if ($remainder) {
-                                                $string .= $separator . numberToWords($remainder);
-                                            }
-                                            break;
-                                    }
-                                    if (null !== $fraction && is_numeric($fraction)) {
-                                        $string .= $decimal;
-                                        $words = [];
-                                        foreach (str_split((string) $fraction) as $number) {
-                                            $words[] = $dictionary[$number];
-                                        }
-                                        $string .= implode(' ', $words);
-                                    }
-                                    return $string;
-                                }
-                            @endphp
-                            <div class="font-semibold text-gray-700 mt-4">
-                                Amount in Words: <span class="italic">{{ ucfirst(numberToWords((int)$invoice->total)) }} only</span>
+                        <div class="mt-8 grid grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                                <p class="mt-1 text-sm text-gray-900">{{ $invoice->notes ?? 'No notes' }}</p>
                             </div>
-                            <div class="mt-6 p-4 border rounded bg-gray-50 inline-block text-left">
-                                <div class="font-semibold mb-2">Bank Details</div>
-                                <div>Bank Name: HDFC Bank</div>
-                                <div>Account Number: 1234567890</div>
-                                <div>IFSC Code: HDFC0001234</div>
-                                <div>Branch: Main Branch, City</div>
+                            <div class="space-y-4">
+                                <div class="flex justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Subtotal:</span>
+                                    <span class="text-sm text-gray-900">{{ number_format($invoice->subtotal, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Total GST:</span>
+                                    <span class="text-sm text-gray-900">{{ number_format($invoice->tax_amount, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between border-t pt-2">
+                                    <span class="text-base font-medium text-gray-900">Grand Total:</span>
+                                    <span class="text-base font-medium text-gray-900">{{ number_format($invoice->total, 2) }}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                    {{-- @if($invoice->notes)
-                        <div class="mt-8">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Notes</h3>
-                            <div class="bg-gray-50 rounded-lg p-4">
-                                <p class="text-sm text-gray-900">{{ $invoice->notes }}</p>
-                            </div>
-                        </div>
-                    @endif --}}
                 </div>
             </div>
         </div>

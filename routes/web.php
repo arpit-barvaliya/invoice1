@@ -63,7 +63,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/invoices/{invoice}/edit', [InvoiceController::class, 'edit'])->name('invoices.edit');
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
-    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'downloadPdf'])->name('invoices.pdf');
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
 
     // Invoice Services Routes
     Route::post('/invoices/{invoice}/services', [InvoiceServiceController::class, 'store'])->name('invoice-services.store');

@@ -9,11 +9,9 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form method="POST" action="{{ route('invoices.store') }}" class="space-y-6" id="invoice-form">
+                    <form action="{{ route('invoices.store') }}" method="POST" id="invoice-form">
                         @csrf
-                        
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Customer Dropdown -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label for="customer_id" class="block text-sm font-medium text-gray-700">Customer</label>
                                 <select name="customer_id" id="customer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
@@ -27,7 +25,6 @@
                                 @enderror
                             </div>
 
-                            <!-- Invoice Date -->
                             <div>
                                 <label for="invoice_date" class="block text-sm font-medium text-gray-700">Invoice Date</label>
                                 <input type="date" name="invoice_date" id="invoice_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" value="{{ date('Y-m-d') }}" required>
@@ -36,10 +33,17 @@
                                 @enderror
                             </div>
 
-                            <!-- Invoice Number -->
+                            <div>
+                                <label for="due_date" class="block text-sm font-medium text-gray-700">Due Date</label>
+                                <input type="date" name="due_date" id="due_date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" value="{{ date('Y-m-d', strtotime('+30 days')) }}" required>
+                                @error('due_date')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
                             <div>
                                 <label for="invoice_number" class="block text-sm font-medium text-gray-700">Invoice Number</label>
-                                <input type="text" name="invoice_number" id="invoice_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" readonly>
+                                <input type="text" name="invoice_number" id="invoice_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" value="{{ $invoiceNumber }}" readonly>
                                 @error('invoice_number')
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
@@ -118,31 +122,70 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to get current financial year
-            function getCurrentFinancialYear() {
-                const today = new Date();
-                const currentMonth = today.getMonth() + 1;
-                const currentYear = today.getFullYear();
+            // Add first row automatically
+            addRow();
+
+            // Add row button click handler
+            document.getElementById('add-row').addEventListener('click', addRow);
+
+            // Form submission handler
+            document.getElementById('invoice-form').addEventListener('submit', function(e) {
+                e.preventDefault();
                 
-                if (currentMonth >= 4) {
-                    return currentYear;
-                } else {
-                    return currentYear - 1;
+                // Validate form
+                if (!validateForm()) {
+                    return;
                 }
+
+                // Submit form
+                this.submit();
+            });
+
+            function validateForm() {
+                const customerId = document.getElementById('customer_id').value;
+                const invoiceDate = document.getElementById('invoice_date').value;
+                const dueDate = document.getElementById('due_date').value;
+                const rows = document.querySelectorAll('#invoice-items tr');
+
+                if (!customerId) {
+                    alert('Please select a customer');
+                    return false;
+                }
+
+                if (!invoiceDate) {
+                    alert('Please select an invoice date');
+                    return false;
+                }
+
+                if (!dueDate) {
+                    alert('Please select a due date');
+                    return false;
+                }
+
+                if (rows.length === 0) {
+                    alert('Please add at least one item to the invoice');
+                    return false;
+                }
+
+                // Validate each row
+                for (let row of rows) {
+                    const service = row.querySelector('.service-select').value;
+                    const quantity = row.querySelector('input[name$="[quantity]"]').value;
+
+                    if (!service) {
+                        alert('Please select a service for all rows');
+                        return false;
+                    }
+
+                    if (!quantity || quantity <= 0) {
+                        alert('Please enter a valid quantity for all rows');
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
-            // Function to generate invoice number
-            function generateInvoiceNumber() {
-                const financialYear = getCurrentFinancialYear();
-                const yearSuffix = financialYear.toString().slice(-2);
-                const nextYearSuffix = (financialYear + 1).toString().slice(-2);
-                return `INV/${yearSuffix}-${nextYearSuffix}/001`;
-            }
-
-            // Set initial invoice number
-            document.getElementById('invoice_number').value = generateInvoiceNumber();
-
-            // Function to add a new row
             function addRow() {
                 const tbody = document.getElementById('invoice-items');
                 const rowCount = tbody.children.length;
@@ -189,12 +232,15 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="basic-amount">0.00</span>
+                        <input type="hidden" name="items[${rowCount}][basic_amount]" class="basic-amount-input" value="0">
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="gst-amount">0.00</span>
+                        <input type="hidden" name="items[${rowCount}][gst_amount]" class="gst-amount-input" value="0">
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="total-amount">0.00</span>
+                        <input type="hidden" name="items[${rowCount}][total_amount]" class="total-amount-input" value="0">
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button type="button" class="text-red-600 hover:text-red-900 delete-row">Delete</button>
@@ -204,46 +250,45 @@
                 attachRowEventListeners(newRow);
             }
 
-            // Function to attach event listeners to row inputs
             function attachRowEventListeners(row) {
-                // Service select change event
                 const serviceSelect = row.querySelector('.service-select');
+                const quantityInput = row.querySelector('input[name$="[quantity]"]');
+                const discountInput = row.querySelector('input[name$="[discount]"]');
+                const schemeAmountInput = row.querySelector('input[name$="[scheme_amount]"]');
+                const deleteButton = row.querySelector('.delete-row');
+
                 serviceSelect.addEventListener('change', function() {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const row = this.closest('tr');
-                    
-                    // Auto-fill the fields
-                    row.querySelector('input[name$="[hsn]"]').value = selectedOption.dataset.hsn || '';
-                    row.querySelector('input[name$="[rate]"]').value = selectedOption.dataset.rate || '';
-                    row.querySelector('input[name$="[cgst]"]').value = selectedOption.dataset.cgst || '';
-                    row.querySelector('input[name$="[sgst]"]').value = selectedOption.dataset.sgst || '';
-                    row.querySelector('input[name$="[igst]"]').value = selectedOption.dataset.igst || '';
-                    
-                    // Trigger calculation
-                    calculateRowAmounts({ target: row.querySelector('input[name$="[quantity]"]') });
+                    const option = this.options[this.selectedIndex];
+                    const hsn = option.dataset.hsn;
+                    const rate = option.dataset.rate;
+                    const cgst = option.dataset.cgst;
+                    const sgst = option.dataset.sgst;
+                    const igst = option.dataset.igst;
+
+                    row.querySelector('input[name$="[hsn]"]').value = hsn;
+                    row.querySelector('input[name$="[rate]"]').value = rate;
+                    row.querySelector('input[name$="[cgst]"]').value = cgst;
+                    row.querySelector('input[name$="[sgst]"]').value = sgst;
+                    row.querySelector('input[name$="[igst]"]').value = igst;
+
+                    calculateRowAmounts(row);
                 });
 
-                // Quantity input event
-                const quantityInput = row.querySelector('input[name$="[quantity]"]');
-                quantityInput.addEventListener('input', calculateRowAmounts);
+                quantityInput.addEventListener('input', () => calculateRowAmounts(row));
+                discountInput.addEventListener('input', () => calculateRowAmounts(row));
+                schemeAmountInput.addEventListener('input', () => calculateRowAmounts(row));
 
-                // Discount and scheme amount inputs
-                const discountInput = row.querySelector('input[name$="[discount]"]');
-                const schemeInput = row.querySelector('input[name$="[scheme_amount]"]');
-                discountInput.addEventListener('input', calculateRowAmounts);
-                schemeInput.addEventListener('input', calculateRowAmounts);
-
-                // Delete button
-                const deleteButton = row.querySelector('.delete-row');
                 deleteButton.addEventListener('click', function() {
-                    row.remove();
-                    calculateTotals();
+                    if (document.querySelectorAll('#invoice-items tr').length > 1) {
+                        row.remove();
+                        calculateTotals();
+                    } else {
+                        alert('Cannot delete the last row');
+                    }
                 });
             }
 
-            // Function to calculate amounts for a row
-            function calculateRowAmounts(event) {
-                const row = event.target.closest('tr');
+            function calculateRowAmounts(row) {
                 const rate = parseFloat(row.querySelector('input[name$="[rate]"]').value) || 0;
                 const quantity = parseFloat(row.querySelector('input[name$="[quantity]"]').value) || 0;
                 const discount = parseFloat(row.querySelector('input[name$="[discount]"]').value) || 0;
@@ -260,10 +305,14 @@
                 row.querySelector('.gst-amount').textContent = gstAmount.toFixed(2);
                 row.querySelector('.total-amount').textContent = total.toFixed(2);
 
+                // Update hidden input values
+                row.querySelector('.basic-amount-input').value = basicAmount.toFixed(2);
+                row.querySelector('.gst-amount-input').value = gstAmount.toFixed(2);
+                row.querySelector('.total-amount-input').value = total.toFixed(2);
+
                 calculateTotals();
             }
 
-            // Function to calculate totals
             function calculateTotals() {
                 let subtotal = 0;
                 let totalGst = 0;
@@ -275,52 +324,13 @@
                     totalDiscount += parseFloat(row.querySelector('input[name$="[discount]"]').value) || 0;
                 });
 
+                const grandTotal = subtotal + totalGst;
+
                 document.getElementById('subtotal').textContent = subtotal.toFixed(2);
                 document.getElementById('total-gst').textContent = totalGst.toFixed(2);
                 document.getElementById('total-discount').textContent = totalDiscount.toFixed(2);
-                document.getElementById('grand-total').textContent = (subtotal + totalGst).toFixed(2);
+                document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
             }
-
-            // Form validation
-            document.getElementById('invoice-form').addEventListener('submit', function(e) {
-                const rows = document.querySelectorAll('#invoice-items tr');
-                if (rows.length === 0) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Please add at least one service to the invoice.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-                let hasEmptyFields = false;
-                rows.forEach(row => {
-                    const serviceSelect = row.querySelector('.service-select');
-                    const quantityInput = row.querySelector('input[name$="[quantity]"]');
-                    
-                    if (!serviceSelect.value || !quantityInput.value) {
-                        hasEmptyFields = true;
-                    }
-                });
-
-                if (hasEmptyFields) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Please fill in all required fields for each service.',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                }
-            });
-
-            // Add event listener to Add Row button
-            document.getElementById('add-row').addEventListener('click', addRow);
-
-            // Add first row by default
-            addRow();
         });
     </script>
     @endpush

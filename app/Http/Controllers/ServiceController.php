@@ -60,6 +60,7 @@ class ServiceController extends Controller
     {
         return $request->validate([
             'name' => 'required|string|max:255',
+            'hsn' => 'nullable|string|max:50',
             'rate' => 'required|numeric|min:0',
             'cgst_rate' => 'required|numeric|min:0|max:100',
             'sgst_rate' => 'required|numeric|min:0|max:100',

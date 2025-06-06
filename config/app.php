@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'invoice_prefix' => env('INVOICE_PREFIX', 'INV'),
+
 ];

@@ -12,6 +12,7 @@ class Service extends Model
 
     protected $fillable = [
         'name',
+        'hsn',
         'rate',
         'cgst_rate',
         'sgst_rate',
