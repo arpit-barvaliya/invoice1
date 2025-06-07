@@ -41,13 +41,17 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $customer->city }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $customer->country }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('customers.show', $customer) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">{{ __('View') }}</a>
-                                            <a href="{{ route('customers.edit', $customer) }}" class="text-blue-600 hover:text-blue-900 mr-3">{{ __('Edit') }}</a>
+                                            <a href="{{ route('customers.show', $customer) }}" class="text-indigo-600 hover:text-indigo-900 mr-3" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ route('customers.edit', $customer) }}" class="text-blue-600 hover:text-blue-900 mr-3" title="Edit">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
                                             <form id="delete-form-{{ $customer->id }}" action="{{ route('customers.destroy', $customer) }}" method="POST" class="inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="button" class="text-red-600 hover:text-red-900" onclick="confirmDelete('delete-form-{{ $customer->id }}')">
-                                                    {{ __('Delete') }}
+                                                <button type="button" class="text-red-600 hover:text-red-900" onclick="confirmDelete('delete-form-{{ $customer->id }}')" title="Delete">
+                                                    <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
                                         </td>
@@ -70,4 +74,24 @@
             </div>
         </div>
     </div>
-</x-app-layout> 
+</x-app-layout>
+
+@push('scripts')
+<script>
+    function confirmDelete(formId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById(formId).submit();
+            }
+        });
+    }
+</script>
+@endpush 

@@ -48,10 +48,6 @@
                                     </th>
                                     <th
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        {{ __('Status') }}
-                                    </th>
-                                    <th
-                                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         {{ __('Actions') }}
                                     </th>
                                 </tr>
@@ -74,33 +70,22 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             ${{ number_format($invoice->total, 2) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span
-                                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                @if ($invoice->status === 'paid') bg-green-100 text-green-800
-                                                @elseif($invoice->status === 'overdue') bg-red-100 text-red-800
-                                                @elseif($invoice->status === 'sent') bg-blue-100 text-blue-800
-                                                @elseif($invoice->status === 'draft') bg-gray-100 text-gray-800
-                                                @else bg-yellow-100 text-yellow-800 @endif">
-                                                {{ ucfirst($invoice->status) }}
-                                            </span>
-                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <a href="{{ route('invoices.show', $invoice) }}"
-                                                class="text-indigo-600 hover:text-indigo-900 mr-3">
-                                                {{ __('View') }}
+                                                class="text-indigo-600 hover:text-indigo-900 mr-3" title="View">
+                                                <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('invoices.edit', $invoice) }}"
-                                                class="text-yellow-600 hover:text-yellow-900 mr-3">
-                                                {{ __('Edit') }}
+                                                class="text-yellow-600 hover:text-yellow-900 mr-3" title="Edit">
+                                                <i class="fas fa-edit"></i>
                                             </a>
                                             <form action="{{ route('invoices.destroy', $invoice) }}" method="POST"
                                                 class="inline" id="delete-form-{{ $invoice->id }}">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="button" onclick="confirmDelete({{ $invoice->id }})"
-                                                    class="text-red-600 hover:text-red-900">
-                                                    {{ __('Delete') }}
+                                                    class="text-red-600 hover:text-red-900" title="Delete">
+                                                    <i class="fas fa-trash-alt"></i>
                                                 </button>
                                             </form>
                                         </td>
