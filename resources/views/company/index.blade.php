@@ -89,7 +89,6 @@
                             <input type="text" name="place_of_supply" id="place_of_supply" value="{{ old('place_of_supply', $company->place_of_supply ?? '') }}"
                                 class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
-
                         <!-- Submit Button -->
                         <div class="flex justify-end">
                             <button type="submit"

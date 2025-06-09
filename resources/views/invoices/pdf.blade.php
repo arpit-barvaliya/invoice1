@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Invoice #{{ $invoice->invoice_number }}</title>
@@ -12,111 +13,145 @@
             line-height: 1.5;
             font-size: 10px;
         }
+
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
+
         .header h1 {
-            color: #1E40AF; /* Tailwind indigo-800 */
+            color: #1E40AF;
+            /* Tailwind indigo-800 */
             margin: 0;
             font-size: 1.8em;
         }
+
         .invoice-details {
             margin-bottom: 20px;
         }
+
         .invoice-details table {
             width: 100%;
             border-collapse: collapse;
         }
-        .invoice-details th, .invoice-details td {
+
+        .invoice-details th,
+        .invoice-details td {
             padding: 5px 8px;
             text-align: left;
         }
+
         .address-section {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 30px;
         }
+
         .address-section td {
             width: 50%;
             vertical-align: top;
             padding: 0 10px;
         }
+
         .address-section h3 {
-            color: #1E40AF; /* Tailwind indigo-800 */
+            color: #1E40AF;
+            /* Tailwind indigo-800 */
             margin-top: 0;
             margin-bottom: 8px;
             border-bottom: 1px solid #ddd;
             padding-bottom: 4px;
             font-size: 1.1em;
         }
+
         .address-details p {
             margin: 3px 0;
         }
+
         .services-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
         }
-        .services-table th, .services-table td {
+
+        .services-table th,
+        .services-table td {
             border: 1px solid #ddd;
             padding: 8px 10px;
             text-align: left;
         }
+
         .services-table th {
-            background-color: #EFF6FF; /* Tailwind blue-100 */
-            color: #1E40AF; /* Tailwind indigo-800 */
+            background-color: #EFF6FF;
+            /* Tailwind blue-100 */
+            color: #1E40AF;
+            /* Tailwind indigo-800 */
             font-weight: bold;
         }
+
         .services-table tbody tr:nth-child(even) {
-            background-color: #F9FAFB; /* Tailwind gray-50 */
+            background-color: #F9FAFB;
+            /* Tailwind gray-50 */
         }
+
         .totals-section {
             width: 250px;
             margin-left: auto;
             margin-top: 15px;
         }
+
         .totals-section table {
             width: 100%;
             border-collapse: collapse;
         }
+
         .totals-section td {
             padding: 5px 8px;
         }
+
         .totals-section .subtotal-row td {
             border-top: 1px solid #ddd;
             font-weight: bold;
         }
-         .totals-section .grand-total-row td {
+
+        .totals-section .grand-total-row td {
             border-top: 2px solid #333;
             font-weight: bold;
             font-size: 1.2em;
         }
+
         .notes {
             margin-top: 30px;
             padding: 10px;
-            background-color: #F3F4F6; /* Tailwind gray-100 */
-            border-left: 4px solid #1E40AF; /* Tailwind indigo-800 */
+            background-color: #F3F4F6;
+            /* Tailwind gray-100 */
+            border-left: 4px solid #1E40AF;
+            /* Tailwind indigo-800 */
         }
+
         .notes p {
             margin: 0;
         }
+
         .footer {
             margin-top: 30px;
             text-align: center;
             font-size: 10px;
             color: #666;
         }
+
         .amount-in-words {
             margin-top: 10px;
             font-style: italic;
-            color: #4B5563; /* Tailwind gray-600 */
+            color: #4B5563;
+            /* Tailwind gray-600 */
             font-size: 0.9em;
         }
     </style>
 </head>
+
 <body>
     <div class="header">
+
         <h1>INVOICE</h1>
     </div>
 
@@ -128,15 +163,18 @@
                 <td><strong>Due Date:</strong> {{ $invoice->due_date->format('Y-m-d') }}</td>
             </tr>
         </table>
-    </div>
-
+    </div>  
     <table class="address-section">
         <tr>
             <td>
                 <div class="company-details">
                     <h3>From:</h3>
                     <div class="address-details">
-                        @if($company)
+                        {{-- @if ($company && $company->logo)
+                            <img src="{{ $company->logo }}" alt="Company Logo"
+                                style="max-height: 80px; margin-bottom: 10px;">
+                        @endif --}}
+                        @if ($company)
                             <p><strong>{{ $company->name }}</strong></p>
                             <p>{{ $company->address }}</p>
                             <p>Phone: {{ $company->phone }}</p>
@@ -184,7 +222,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($invoice->services as $service)
+            @foreach ($invoice->services as $service)
                 <tr>
                     <td>{{ $service->service->name }}</td>
                     <td>{{ $service->service->hsn }}</td>
@@ -223,7 +261,7 @@
         </div>
     </div>
 
-    @if($invoice->notes)
+    @if ($invoice->notes)
         <div class="notes">
             <strong>Notes:</strong><br>
             <p>{{ $invoice->notes }}</p>
@@ -234,4 +272,5 @@
         <p>This is a computer-generated invoice. No signature is required.</p>
     </div>
 </body>
-</html> 
+
+</html>

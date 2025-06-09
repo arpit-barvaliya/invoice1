@@ -71,23 +71,30 @@
                                             ${{ number_format($invoice->total, 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="{{ route('invoices.show', $invoice) }}"
-                                                class="text-indigo-600 hover:text-indigo-900 mr-3" title="View">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            <a href="{{ route('invoices.edit', $invoice) }}"
-                                                class="text-yellow-600 hover:text-yellow-900 mr-3" title="Edit">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('invoices.destroy', $invoice) }}" method="POST"
-                                                class="inline" id="delete-form-{{ $invoice->id }}">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="button" onclick="confirmDelete({{ $invoice->id }})"
-                                                    class="text-red-600 hover:text-red-900" title="Delete">
-                                                    <i class="fas fa-trash-alt"></i>
-                                                </button>
-                                            </form>
+                                            <div class="flex items-center space-x-3">
+                                                <a href="{{ route('invoices.show', $invoice) }}"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200"
+                                                    title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('invoices.edit', $invoice) }}"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 transition-colors duration-200"
+                                                    title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form id="delete-form-{{ $invoice->id }}"
+                                                    action="{{ route('invoices.destroy', $invoice) }}" method="POST"
+                                                    class="inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="button"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
+                                                        onclick="confirmDelete({{ $invoice->id }})"
+                                                        title="Delete">
+                                                        <i class="fas fa-trash-alt mr-1.5"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
                                         </td>
                                     </tr>
                                 @empty

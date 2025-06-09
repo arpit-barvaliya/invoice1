@@ -146,6 +146,9 @@ class InvoiceController extends Controller
     public function pdf(Invoice $invoice)
     {
         $company = Company::first();
+        if ($company && $company->logo) {
+            $company->logo = storage_path('app/public/' . $company->logo);
+        }
         $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'company'));
         return $pdf->stream('invoice-' . str_replace(['/', '\\'], '-', $invoice->invoice_number) . '.pdf');
     }
