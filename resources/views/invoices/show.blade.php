@@ -43,11 +43,11 @@
                         @if($company)
                         <div class="border rounded-lg p-4">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">From:</h3>
-                            <div class="flex items-start space-x-4">
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
                                 @if($company->logo)
-                                    <img src="{{ Storage::url($company->logo) }}" alt="Company Logo" class="h-20 w-20 object-contain">
+                                    <img src="{{ Storage::url($company->logo) }}" alt="Company Logo" style="width: 80px; height: 80px; object-fit: contain; flex-shrink: 0;">
                                 @endif
-                                <div>
+                                <div style="flex-grow: 1;">
                                     <h4 class="text-lg font-semibold text-gray-900">{{ $company->name }}</h4>
                                     <p class="text-sm text-gray-600">{{ $company->address }}</p>
                                     <div class="mt-2 space-y-1">

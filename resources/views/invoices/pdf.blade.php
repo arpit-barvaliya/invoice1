@@ -173,10 +173,10 @@
                 <div class="company-details">
                     <h3>From:</h3>
                     <div class="address-details">
-                        {{-- @if ($company && $company->logo)
+                        @if ($company && $company->logo)
                             <img src="{{ $company->logo }}" alt="Company Logo"
-                                style="max-height: 80px; margin-bottom: 10px;">
-                        @endif --}}
+                                style="max-height: 50px; margin-bottom: 5px;">
+                        @endif
                         @if ($company)
                             <p><strong>{{ $company->name }}</strong></p>
                             <p>{{ $company->address }}</p>
