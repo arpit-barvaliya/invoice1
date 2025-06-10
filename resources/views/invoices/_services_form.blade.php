@@ -1,115 +1,261 @@
 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">Services</h3>
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Invoice Items</h3>
 
-    <form action="{{ isset($invoiceService) ? route('invoice-services.update', [$invoice, $invoiceService]) : route('invoice-services.store', $invoice) }}" method="POST" class="space-y-4">
-        @csrf
-        @if(isset($invoiceService))
-            @method('PUT')
-        @endif
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <x-input-label for="service_id" value="Service" />
-                <select name="service_id" id="service_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" {{ isset($invoiceService) ? 'disabled' : '' }}>
-                    <option value="">Select a service</option>
-                    @foreach($services as $service)
-                        <option value="{{ $service->id }}" {{ (isset($invoiceService) && $invoiceService->service_id == $service->id) ? 'selected' : '' }}>
-                            {{ $service->name }} ({{ $service->rate }}/{{ $service->unit }})
-                        </option>
-                    @endforeach
-                </select>
-                <x-input-error :messages="$errors->get('service_id')" class="mt-2" />
-            </div>
-
-            <div>
-                <x-input-label for="quantity" value="Quantity" />
-                <x-text-input id="quantity" name="quantity" type="number" class="mt-1 block w-full" :value="old('quantity', $invoiceService->quantity ?? '')" min="1" step="1" required />
-                <x-input-error :messages="$errors->get('quantity')" class="mt-2" />
-            </div>
-
-            <div>
-                <x-input-label for="rate" value="Rate" />
-                <x-text-input id="rate" name="rate" type="number" class="mt-1 block w-full" :value="old('rate', $invoiceService->rate ?? '')" min="0" step="0.01" required />
-                <x-input-error :messages="$errors->get('rate')" class="mt-2" />
-            </div>
-
-            <div>
-                <x-input-label for="amount" value="Amount" />
-                <x-text-input id="amount" type="number" class="mt-1 block w-full bg-gray-50" :value="old('amount', $invoiceService->amount ?? '')" disabled />
-            </div>
-        </div>
-
-        <div>
-            <x-input-label for="description" value="Description" />
-            <textarea id="description" name="description" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="3">{{ old('description', $invoiceService->description ?? '') }}</textarea>
-            <x-input-error :messages="$errors->get('description')" class="mt-2" />
-        </div>
-
-        <div class="flex justify-end">
-            <x-primary-button>
-                {{ isset($invoiceService) ? 'Update Service' : 'Add Service' }}
-            </x-primary-button>
-        </div>
-    </form>
-
-    @if(isset($invoice) && $invoice->services->count() > 0)
-        <div class="mt-8">
-            <h4 class="text-lg font-medium text-gray-900 mb-4">Added Services</h4>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+    <div class="overflow-x-auto mb-4">
+        <table class="min-w-full divide-y divide-gray-200" id="invoice-items-table">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HSN</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Basic Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GST Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @if(isset($invoice) && $invoice->services->count() > 0)
+                    @foreach($invoice->services as $index => $service)
+                        <tr data-id="{{ $service->id }}" class="invoice-item-row">
+                            <td class="p-1">
+                                <select name="items[{{ $index }}][service_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm service-select" required>
+                                    <option value="">Select a service</option>
+                                    @foreach($services as $s)
+                                        <option value="{{ $s->id }}" data-rate="{{ $s->rate }}" data-hsn="{{ $s->hsn ?? '' }}" {{ $service->service_id == $s->id ? 'selected' : '' }}>
+                                            {{ $s->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="text" name="items[{{ $index }}][hsn]" class="w-full hsn-input" value="{{ $service->service->hsn ?? '' }}" readonly />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][rate]" class="w-full rate-input" value="{{ old('items.' . $index . '.rate', $service->rate) }}" min="0" step="0.01" required />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][quantity]" class="w-full quantity-input" value="{{ old('items.' . $index . '.quantity', $service->quantity) }}" min="1" step="1" required />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][cgst]" class="w-full cgst-input" value="{{ old('items.' . $index . '.cgst', $service->cgst_rate) }}" min="0" step="0.01" required />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][sgst]" class="w-full sgst-input" value="{{ old('items.' . $index . '.sgst', $service->sgst_rate) }}" min="0" step="0.01" required />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][igst]" class="w-full igst-input" value="{{ old('items.' . $index . '.igst', $service->igst_rate) }}" min="0" step="0.01" required />
+                            </td>
+                             <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][discount]" class="w-full discount-input" value="{{ old('items.' . $index . '.discount', $service->discount) }}" min="0" step="0.01" />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][basic_amount]" class="w-full basic-amount-input" value="{{ old('items.' . $index . '.basic_amount', $service->basic_amount) }}" min="0" step="0.01" readonly />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][gst_amount]" class="w-full gst-amount-input" value="{{ old('items.' . $index . '.gst_amount', $service->gst_amount) }}" min="0" step="0.01" readonly />
+                            </td>
+                            <td class="p-1">
+                                <x-text-input type="number" name="items[{{ $index }}][total_amount]" class="w-full total-amount-input" value="{{ old('items.' . $index . '.total_amount', $service->total_amount) }}" min="0" step="0.01" readonly />
+                            </td>
+                            <td class="p-1">
+                                <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn" title="Remove">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach($invoice->services as $service)
-                            <tr>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $service->service->name }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ $service->quantity }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->rate, 2) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->amount, 2) }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <a href="{{ route('invoices.edit', $invoice) }}?edit_service={{ $service->id }}" class="text-indigo-600 hover:text-indigo-900 mr-3" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('invoice-services.destroy', [$invoice, $service]) }}" method="POST" class="inline">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:text-red-900" onclick="return confirm('Are you sure you want to remove this service?')" title="Delete">
-                                            <i class="fas fa-trash-alt"></i>
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                    @endforeach
+                @endif
+                <tr id="no-items-row" class="@if(isset($invoice) && $invoice->services->count() > 0) hidden @endif">
+                    <td colspan="12" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No services added yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex justify-start mb-4">
+        <x-secondary-button type="button" id="add-row-btn">
+            <i class="fas fa-plus mr-2"></i> Add Row
+        </x-secondary-button>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+        <div class="col-span-2 md:col-span-2">
+            <x-input-label for="notes" value="Notes" />
+            <textarea id="notes" name="notes" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" rows="2">{{ old('notes', $invoice->notes ?? '') }}</textarea>
+            <x-input-error :messages="$errors->get('notes')" class="mt-2" />
+        </div>
+        <div class="col-span-2">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-700">Subtotal:</span>
+                <x-text-input type="text" id="subtotal" name="subtotal" class="w-1/2 text-right bg-gray-50" value="{{ old('subtotal', $invoice->subtotal ?? '0.00') }}" readonly />
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-700">Total GST:</span>
+                <x-text-input type="text" id="total_gst" name="total_gst" class="w-1/2 text-right bg-gray-50" value="{{ old('total_gst', $invoice->tax_amount ?? '0.00') }}" readonly />
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-700">Total Discount:</span>
+                <x-text-input type="text" id="total_discount" name="total_discount" class="w-1/2 text-right bg-gray-50" value="{{ old('total_discount', $invoice->total_discount ?? '0.00') }}" readonly />
+            </div>
+            <div class="flex justify-between items-center border-t pt-2 mt-2">
+                <span class="text-lg font-semibold text-gray-900">Grand Total:</span>
+                <x-text-input type="text" id="grand_total" name="total" class="w-1/2 text-right bg-gray-50 font-semibold" value="{{ old('total', $invoice->total ?? '0.00') }}" readonly />
             </div>
         </div>
-    @endif
+    </div>
 </div>
 
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const quantityInput = document.getElementById('quantity');
-        const rateInput = document.getElementById('rate');
-        const amountInput = document.getElementById('amount');
+        const invoiceItemsTableBody = document.querySelector('#invoice-items-table tbody');
+        const addRowBtn = document.getElementById('add-row-btn');
+        const noItemsRow = document.getElementById('no-items-row');
 
-        function calculateAmount() {
-            const quantity = parseFloat(quantityInput.value) || 0;
-            const rate = parseFloat(rateInput.value) || 0;
-            const amount = quantity * rate;
-            amountInput.value = amount.toFixed(2);
+        const subtotalInput = document.getElementById('subtotal');
+        const totalGstInput = document.getElementById('total_gst');
+        const totalDiscountInput = document.getElementById('total_discount');
+        const grandTotalInput = document.getElementById('grand_total');
+
+        let itemIndex = {{ isset($invoice) && $invoice->services->count() > 0 ? $invoice->services->count() : 0 }};
+
+        function calculateRowAmounts(row) {
+            const quantity = parseFloat(row.querySelector('.quantity-input').value) || 0;
+            const rate = parseFloat(row.querySelector('.rate-input').value) || 0;
+            const cgst = parseFloat(row.querySelector('.cgst-input').value) || 0;
+            const sgst = parseFloat(row.querySelector('.sgst-input').value) || 0;
+            const igst = parseFloat(row.querySelector('.igst-input').value) || 0;
+            const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+
+            const basicAmount = quantity * rate;
+            const gstRate = cgst + sgst + igst;
+            const gstAmount = (basicAmount * gstRate) / 100;
+            const totalAmount = basicAmount + gstAmount - discount;
+
+            row.querySelector('.basic-amount-input').value = basicAmount.toFixed(2);
+            row.querySelector('.gst-amount-input').value = gstAmount.toFixed(2);
+            row.querySelector('.total-amount-input').value = totalAmount.toFixed(2);
         }
 
-        quantityInput.addEventListener('input', calculateAmount);
-        rateInput.addEventListener('input', calculateAmount);
+        function updateTotals() {
+            let totalSubtotal = 0;
+            let totalGst = 0;
+            let totalDiscount = 0;
+
+            document.querySelectorAll('.invoice-item-row').forEach(row => {
+                const basicAmount = parseFloat(row.querySelector('.basic-amount-input').value) || 0;
+                const gstAmount = parseFloat(row.querySelector('.gst-amount-input').value) || 0;
+                const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+
+                totalSubtotal += basicAmount;
+                totalGst += gstAmount;
+                totalDiscount += discount;
+            });
+
+            const grandTotal = totalSubtotal + totalGst - totalDiscount;
+
+            subtotalInput.value = totalSubtotal.toFixed(2);
+            totalGstInput.value = totalGst.toFixed(2);
+            totalDiscountInput.value = totalDiscount.toFixed(2);
+            grandTotalInput.value = grandTotal.toFixed(2);
+        }
+
+        function addEventListenersToRow(row) {
+            row.querySelector('.service-select').addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const rate = selectedOption.dataset.rate || 0;
+                const hsn = selectedOption.dataset.hsn || '';
+                row.querySelector('.rate-input').value = rate;
+                row.querySelector('.hsn-input').value = hsn;
+                calculateRowAmounts(row);
+                updateTotals();
+            });
+
+            row.querySelectorAll('.quantity-input, .rate-input, .cgst-input, .sgst-input, .igst-input, .discount-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    calculateRowAmounts(row);
+                    updateTotals();
+                });
+            });
+
+            row.querySelector('.remove-item-btn').addEventListener('click', function() {
+                row.remove();
+                if (invoiceItemsTableBody.querySelectorAll('.invoice-item-row').length === 0) {
+                    noItemsRow.classList.remove('hidden');
+                }
+                updateTotals();
+            });
+        }
+
+        // Add event listeners to existing rows
+        document.querySelectorAll('.invoice-item-row').forEach(row => {
+            addEventListenersToRow(row);
+            calculateRowAmounts(row); // Calculate initial amounts for existing rows
+        });
+
+        // Initial total calculation for existing rows
+        updateTotals();
+
+        addRowBtn.addEventListener('click', function() {
+            noItemsRow.classList.add('hidden');
+            const newRow = document.createElement('tr');
+            newRow.classList.add('invoice-item-row');
+            newRow.innerHTML = `
+                <td class="p-1">
+                    <select name="items[${itemIndex}][service_id]" class="block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm service-select" required>
+                        <option value="">Select a service</option>
+                        @foreach($services as $s)
+                            <option value="{{ $s->id }}" data-rate="{{ $s->rate }}" data-hsn="{{ $s->hsn ?? '' }}">{{ $s->name }}</option>
+                        @endforeach
+                    </select>
+                </td>
+                <td class="p-1">
+                    <x-text-input type="text" name="items[${itemIndex}][hsn]" class="w-full hsn-input" value="" readonly />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][rate]" class="w-full rate-input" value="0.00" min="0" step="0.01" required />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][quantity]" class="w-full quantity-input" value="1" min="1" step="1" required />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][cgst]" class="w-full cgst-input" value="0.00" min="0" step="0.01" required />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][sgst]" class="w-full sgst-input" value="0.00" min="0" step="0.01" required />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][igst]" class="w-full igst-input" value="0.00" min="0" step="0.01" required />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][discount]" class="w-full discount-input" value="0.00" min="0" step="0.01" />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][basic_amount]" class="w-full basic-amount-input" value="0.00" min="0" step="0.01" readonly />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][gst_amount]" class="w-full gst-amount-input" value="0.00" min="0" step="0.01" readonly />
+                </td>
+                <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][total_amount]" class="w-full total-amount-input" value="0.00" min="0" step="0.01" readonly />
+                </td>
+                <td class="p-1">
+                    <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn" title="Remove">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </td>
+            `;
+            invoiceItemsTableBody.appendChild(newRow);
+            addEventListenersToRow(newRow);
+            itemIndex++;
+            updateTotals();
+        });
     });
 </script>
-@endpush 
+@endpush

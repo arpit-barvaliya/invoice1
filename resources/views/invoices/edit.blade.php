@@ -13,7 +13,7 @@
                         @csrf
                         @method('PUT')
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                             <div>
                                 <x-input-label for="customer_id" value="Customer" />
                                 <select name="customer_id" id="customer_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm" required>
@@ -46,14 +46,14 @@
                             </div>
                         </div>
 
+                        @include('invoices._services_form')
+
                         <div class="flex justify-end">
                             <x-primary-button>
                                 {{ __('Update Invoice') }}
                             </x-primary-button>
                         </div>
                     </form>
-
-                    @include('invoices._services_form')
                 </div>
             </div>
         </div>
@@ -62,23 +62,8 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('invoiceForm');
-            const subtotalInput = document.getElementById('subtotal');
-            const taxRateInput = document.getElementById('tax_rate');
-
-            function calculateTotals() {
-                const subtotal = parseFloat(subtotalInput.value) || 0;
-                const taxRate = parseFloat(taxRateInput.value) || 0;
-                const taxAmount = (subtotal * taxRate) / 100;
-                const total = subtotal + taxAmount;
-
-                // You can display these values in the form if needed
-                console.log('Tax Amount:', taxAmount);
-                console.log('Total:', total);
-            }
-
-            subtotalInput.addEventListener('input', calculateTotals);
-            taxRateInput.addEventListener('input', calculateTotals);
+            // This script is now mostly handled by _services_form.blade.php
+            // Kept for any future global invoice-edit specific scripts.
         });
     </script>
     @endpush

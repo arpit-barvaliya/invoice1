@@ -91,7 +91,7 @@
                                                         class="inline-flex items-center px-3 py-1.5 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition-colors duration-200"
                                                         onclick="confirmDelete({{ $invoice->id }})"
                                                         title="Delete">
-                                                        <i class="fas fa-trash-alt mr-1.5"></i>
+                                                        <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
                                             </div>

@@ -10,11 +10,10 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-
 class InvoiceController extends Controller
 {
     public function index()
-    {
+    { 
         $invoices = Invoice::with('customer')->latest()->paginate(10);
         return view('invoices.index', compact('invoices'));
     }
@@ -122,10 +121,89 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
-            'invoice_number' => 'required|string|unique:invoices,invoice_number,' . $invoice->id
+            'invoice_number' => 'required|string|unique:invoices,invoice_number,' . $invoice->id,
+            'items' => 'required|array|min:1',
+            'items.*.service_id' => 'required|exists:services,id',
+            'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.rate' => 'required|numeric|min:0',
+            'items.*.cgst' => 'required|numeric|min:0',
+            'items.*.sgst' => 'required|numeric|min:0',
+            'items.*.igst' => 'required|numeric|min:0',
+            'items.*.discount' => 'nullable|numeric|min:0',
+            'items.*.basic_amount' => 'required|numeric|min:0',
+            'items.*.gst_amount' => 'required|numeric|min:0',
+            'items.*.total_amount' => 'required|numeric|min:0',
+            'notes' => 'nullable|string',
         ]);
 
-        $invoice->update($validated);
+        // Calculate totals from the submitted items
+        $subtotal = 0;
+        $totalGst = 0;
+        $totalDiscount = 0;
+
+        foreach ($request->items as $item) {
+            $subtotal += $item['basic_amount'];
+            $totalGst += $item['gst_amount'];
+            $totalDiscount += ($item['discount'] ?? 0);
+        }
+
+        $total = $subtotal + $totalGst;
+
+        // Update invoice header details
+        $invoice->update([
+            'invoice_number' => $validated['invoice_number'],
+            'customer_id' => $validated['customer_id'],
+            'invoice_date' => $validated['invoice_date'],
+            'due_date' => $validated['due_date'],
+            'subtotal' => $subtotal,
+            'tax_amount' => $totalGst,
+            'total' => $total,
+            'notes' => $request->notes,
+        ]);
+
+        // Get current service IDs for the invoice
+        $currentServiceIds = $invoice->services->pluck('id')->toArray();
+        $submittedServiceIds = [];
+
+        foreach ($request->items as $item) {
+            if (isset($item['id']) && !empty($item['id'])) {
+                // Update existing invoice service
+                $invoiceService = $invoice->services()->find($item['id']);
+                if ($invoiceService) {
+                    $invoiceService->update([
+                        'service_id' => $item['service_id'],
+                        'quantity' => $item['quantity'],
+                        'rate' => $item['rate'],
+                        'cgst_rate' => $item['cgst'],
+                        'sgst_rate' => $item['sgst'],
+                        'igst_rate' => $item['igst'],
+                        'discount' => $item['discount'] ?? 0,
+                        'basic_amount' => $item['basic_amount'],
+                        'gst_amount' => $item['gst_amount'],
+                        'total_amount' => $item['total_amount'],
+                    ]);
+                    $submittedServiceIds[] = $item['id'];
+                }
+            } else {
+                // Create new invoice service
+                $invoice->services()->create([
+                    'service_id' => $item['service_id'],
+                    'quantity' => $item['quantity'],
+                    'rate' => $item['rate'],
+                    'cgst_rate' => $item['cgst'],
+                    'sgst_rate' => $item['sgst'],
+                    'igst_rate' => $item['igst'],
+                    'discount' => $item['discount'] ?? 0,
+                    'basic_amount' => $item['basic_amount'],
+                    'gst_amount' => $item['gst_amount'],
+                    'total_amount' => $item['total_amount'],
+                ]);
+            }
+        }
+
+        // Delete services that were removed from the form
+        $servicesToDelete = array_diff($currentServiceIds, $submittedServiceIds);
+        $invoice->services()->whereIn('id', $servicesToDelete)->delete();
 
         return redirect()->route('invoices.show', $invoice)
             ->with('success', 'Invoice updated successfully.');
