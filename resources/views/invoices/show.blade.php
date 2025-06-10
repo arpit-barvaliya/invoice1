@@ -8,7 +8,7 @@
                 <a href="{{ route('invoices.edit', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
                     {{ __('Edit Invoice') }}
                 </a>
-                <a href="{{ route('invoices.pdf', $invoice) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
+                <a href="{{ route('invoices.pdf', $invoice) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700">
                     {{ __('Download PDF') }}
                 </a>
             </div>
@@ -19,7 +19,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-end">
                         <div>
                             <label class="block text-sm font-medium text-gray-700">Invoice Date</label>
                             <p class="mt-1 text-sm text-gray-900">{{ $invoice->invoice_date->format('Y-m-d') }}</p>
@@ -85,18 +85,18 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">Service</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">HSN</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Rate</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Quantity</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">CGST</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">SGST</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">IGST</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 200px;">Discount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Scheme Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Basic Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">GST Amount</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 220px;">Total</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Service</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">HSN</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Quantity</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">CGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">SGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">IGST</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 180px;">Discount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">Scheme Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">Basic Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">GST Amount</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 250px;">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -110,7 +110,7 @@
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->sgst_rate, 2) }}%</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->igst_rate, 2) }}%</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->discount, 2) }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->scheme_amount, 2) }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->scheme_amount ?? 0, 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->basic_amount, 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->gst_amount, 2) }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">{{ number_format($service->total_amount, 2) }}</td>
@@ -129,7 +129,7 @@
                         <div class="mt-8 grid grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Notes</label>
-                                <p class="mt-1 text-sm text-gray-900">{{ $invoice->notes ?? 'No notes' }}</p>
+                                <p class="mt-1 text-sm text-gray-900">{{ $invoice->notes}}</p>
                             </div>
                             <div class="space-y-4">
                                 <div class="flex justify-between">
@@ -139,6 +139,14 @@
                                 <div class="flex justify-between">
                                     <span class="text-sm font-medium text-gray-700">Total GST:</span>
                                     <span class="text-sm text-gray-900">{{ number_format($invoice->tax_amount, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Total Discount:</span>
+                                    <span class="text-sm text-gray-900">{{ number_format($invoice->total_discount ?? 0, 2) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm font-medium text-gray-700">Total Scheme Amount:</span>
+                                    <span class="text-sm text-gray-900">{{ number_format($invoice->total_scheme_amount ?? 0, 2) }}</span>
                                 </div>
                                 <div class="flex justify-between border-t pt-2">
                                     <span class="text-base font-medium text-gray-900">Grand Total:</span>

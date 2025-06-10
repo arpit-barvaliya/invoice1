@@ -5,18 +5,19 @@
         <table class="min-w-full divide-y divide-gray-200" id="invoice-items-table">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HSN</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Basic Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GST Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 300px;">Service</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">HSN</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Rate</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Quantity</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">CGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">SGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">IGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Discount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Scheme Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Basic Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">GST Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Total Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px;">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -37,34 +38,37 @@
                                 <x-text-input type="text" name="items[{{ $index }}][hsn]" class="w-full hsn-input" value="{{ $service->service->hsn ?? '' }}" readonly />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][rate]" class="w-full rate-input" value="{{ old('items.' . $index . '.rate', $service->rate) }}" min="0" step="0.01" required />
+                                <x-text-input type="number" name="items[{{ $index }}][rate]" class="w-full rate-input" value="{{ old('items.' . $index . '.rate', number_format($service->rate, 2, '.', '')) }}" min="0" step="0.01" required />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][quantity]" class="w-full quantity-input" value="{{ old('items.' . $index . '.quantity', $service->quantity) }}" min="1" step="1" required />
+                                <x-text-input type="number" name="items[{{ $index }}][quantity]" class="w-full quantity-input" value="{{ old('items.' . $index . '.quantity', number_format($service->quantity, 0, '.', '')) }}" min="1" step="1" required />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][cgst]" class="w-full cgst-input" value="{{ old('items.' . $index . '.cgst', $service->cgst_rate) }}" min="0" step="0.01" required />
+                                <x-text-input type="number" name="items[{{ $index }}][cgst]" class="w-full cgst-input" value="{{ old('items.' . $index . '.cgst', number_format($service->cgst_rate, 2, '.', '')) }}" min="0" step="0.01" required />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][sgst]" class="w-full sgst-input" value="{{ old('items.' . $index . '.sgst', $service->sgst_rate) }}" min="0" step="0.01" required />
+                                <x-text-input type="number" name="items[{{ $index }}][sgst]" class="w-full sgst-input" value="{{ old('items.' . $index . '.sgst', number_format($service->sgst_rate, 2, '.', '')) }}" min="0" step="0.01" required />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][igst]" class="w-full igst-input" value="{{ old('items.' . $index . '.igst', $service->igst_rate) }}" min="0" step="0.01" required />
+                                <x-text-input type="number" name="items[{{ $index }}][igst]" class="w-full igst-input" value="{{ old('items.' . $index . '.igst', number_format($service->igst_rate, 2, '.', '')) }}" min="0" step="0.01" required />
                             </td>
                              <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][discount]" class="w-full discount-input" value="{{ old('items.' . $index . '.discount', $service->discount) }}" min="0" step="0.01" />
+                                <x-text-input type="number" name="items[{{ $index }}][discount]" class="w-full discount-input" value="{{ old('items.' . $index . '.discount', number_format($service->discount, 2, '.', '')) }}" min="0" step="0.01" />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][basic_amount]" class="w-full basic-amount-input" value="{{ old('items.' . $index . '.basic_amount', $service->basic_amount) }}" min="0" step="0.01" readonly />
+                                <x-text-input type="number" name="items[{{ $index }}][scheme_amount]" class="w-full scheme-amount-input" value="{{ old('items.' . $index . '.scheme_amount', number_format($service->scheme_amount, 2, '.', '')) }}" min="0" step="0.01" />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][gst_amount]" class="w-full gst-amount-input" value="{{ old('items.' . $index . '.gst_amount', $service->gst_amount) }}" min="0" step="0.01" readonly />
+                                <x-text-input type="number" name="items[{{ $index }}][basic_amount]" class="w-full basic-amount-input" value="{{ old('items.' . $index . '.basic_amount', number_format($service->basic_amount, 2, '.', '')) }}" min="0" step="0.01" readonly />
                             </td>
                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][total_amount]" class="w-full total-amount-input" value="{{ old('items.' . $index . '.total_amount', $service->total_amount) }}" min="0" step="0.01" readonly />
+                                <x-text-input type="number" name="items[{{ $index }}][gst_amount]" class="w-full gst-amount-input" value="{{ old('items.' . $index . '.gst_amount', number_format($service->gst_amount, 2, '.', '')) }}" min="0" step="0.01" readonly />
                             </td>
                             <td class="p-1">
-                                <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn" title="Remove">
+                                <x-text-input type="number" name="items[{{ $index }}][total_amount]" class="w-full total-amount-input" value="{{ old('items.' . $index . '.total_amount', number_format($service->total_amount, 2, '.', '')) }}" min="0" step="0.01" readonly />
+                            </td>
+                            <td class="p-1 text-center" style="min-width: 100px;">
+                                <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn p-2 rounded-md border border-gray-300 inline-flex items-center justify-center" title="Remove">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
@@ -79,7 +83,7 @@
     </div>
 
     <div class="flex justify-start mb-4">
-        <x-secondary-button type="button" id="add-row-btn">
+        <x-secondary-button type="button" id="add-row-btn" class="bg-yellow-100 hover:bg-indigo-600 text-black">
             <i class="fas fa-plus mr-2"></i> Add Row
         </x-secondary-button>
     </div>
@@ -93,19 +97,23 @@
         <div class="col-span-2">
             <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-700">Subtotal:</span>
-                <x-text-input type="text" id="subtotal" name="subtotal" class="w-1/2 text-right bg-gray-50" value="{{ old('subtotal', $invoice->subtotal ?? '0.00') }}" readonly />
+                <x-text-input type="text" id="subtotal" name="subtotal" class="w-1/2 text-right bg-gray-50" value="{{ old('subtotal', number_format($invoice->subtotal, 2, '.', '')) }}" readonly />
             </div>
             <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-700">Total GST:</span>
-                <x-text-input type="text" id="total_gst" name="total_gst" class="w-1/2 text-right bg-gray-50" value="{{ old('total_gst', $invoice->tax_amount ?? '0.00') }}" readonly />
+                <x-text-input type="text" id="total_gst" name="total_gst" class="w-1/2 text-right bg-gray-50" value="{{ old('total_gst', number_format($invoice->tax_amount, 2, '.', '')) }}" readonly />
             </div>
             <div class="flex justify-between items-center mb-2">
                 <span class="text-gray-700">Total Discount:</span>
-                <x-text-input type="text" id="total_discount" name="total_discount" class="w-1/2 text-right bg-gray-50" value="{{ old('total_discount', $invoice->total_discount ?? '0.00') }}" readonly />
+                <x-text-input type="text" id="total_discount" name="total_discount" class="w-1/2 text-right bg-gray-50" value="{{ old('total_discount', number_format($invoice->total_discount ?? 0, 2, '.', '')) }}" readonly />
+            </div>
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-gray-700">Total Scheme Amount:</span>
+                <x-text-input type="text" id="total_scheme_amount" name="total_scheme_amount" class="w-1/2 text-right bg-gray-50" value="{{ old('total_scheme_amount', number_format($invoice->total_scheme_amount ?? 0, 2, '.', '')) }}" readonly />
             </div>
             <div class="flex justify-between items-center border-t pt-2 mt-2">
                 <span class="text-lg font-semibold text-gray-900">Grand Total:</span>
-                <x-text-input type="text" id="grand_total" name="total" class="w-1/2 text-right bg-gray-50 font-semibold" value="{{ old('total', $invoice->total ?? '0.00') }}" readonly />
+                <x-text-input type="text" id="grand_total" name="total" class="w-1/2 text-right bg-gray-50 font-semibold" value="{{ old('total', number_format($invoice->total, 2, '.', '')) }}" readonly />
             </div>
         </div>
     </div>
@@ -121,6 +129,7 @@
         const subtotalInput = document.getElementById('subtotal');
         const totalGstInput = document.getElementById('total_gst');
         const totalDiscountInput = document.getElementById('total_discount');
+        const totalSchemeAmountInput = document.getElementById('total_scheme_amount');
         const grandTotalInput = document.getElementById('grand_total');
 
         let itemIndex = {{ isset($invoice) && $invoice->services->count() > 0 ? $invoice->services->count() : 0 }};
@@ -132,11 +141,12 @@
             const sgst = parseFloat(row.querySelector('.sgst-input').value) || 0;
             const igst = parseFloat(row.querySelector('.igst-input').value) || 0;
             const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+            const schemeAmount = parseFloat(row.querySelector('.scheme-amount-input').value) || 0;
 
             const basicAmount = quantity * rate;
             const gstRate = cgst + sgst + igst;
             const gstAmount = (basicAmount * gstRate) / 100;
-            const totalAmount = basicAmount + gstAmount - discount;
+            const totalAmount = basicAmount + gstAmount - discount - schemeAmount;
 
             row.querySelector('.basic-amount-input').value = basicAmount.toFixed(2);
             row.querySelector('.gst-amount-input').value = gstAmount.toFixed(2);
@@ -147,22 +157,26 @@
             let totalSubtotal = 0;
             let totalGst = 0;
             let totalDiscount = 0;
+            let totalSchemeAmount = 0;
 
             document.querySelectorAll('.invoice-item-row').forEach(row => {
                 const basicAmount = parseFloat(row.querySelector('.basic-amount-input').value) || 0;
                 const gstAmount = parseFloat(row.querySelector('.gst-amount-input').value) || 0;
                 const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+                const schemeAmount = parseFloat(row.querySelector('.scheme-amount-input').value) || 0;
 
                 totalSubtotal += basicAmount;
                 totalGst += gstAmount;
                 totalDiscount += discount;
+                totalSchemeAmount += schemeAmount;
             });
 
-            const grandTotal = totalSubtotal + totalGst - totalDiscount;
+            const grandTotal = totalSubtotal + totalGst - totalDiscount - totalSchemeAmount;
 
             subtotalInput.value = totalSubtotal.toFixed(2);
             totalGstInput.value = totalGst.toFixed(2);
             totalDiscountInput.value = totalDiscount.toFixed(2);
+            totalSchemeAmountInput.value = totalSchemeAmount.toFixed(2);
             grandTotalInput.value = grandTotal.toFixed(2);
         }
 
@@ -177,7 +191,7 @@
                 updateTotals();
             });
 
-            row.querySelectorAll('.quantity-input, .rate-input, .cgst-input, .sgst-input, .igst-input, .discount-input').forEach(input => {
+            row.querySelectorAll('.quantity-input, .rate-input, .cgst-input, .sgst-input, .igst-input, .discount-input, .scheme-amount-input').forEach(input => {
                 input.addEventListener('input', function() {
                     calculateRowAmounts(row);
                     updateTotals();
@@ -237,6 +251,9 @@
                     <x-text-input type="number" name="items[${itemIndex}][discount]" class="w-full discount-input" value="0.00" min="0" step="0.01" />
                 </td>
                 <td class="p-1">
+                    <x-text-input type="number" name="items[${itemIndex}][scheme_amount]" class="w-full scheme-amount-input" value="0.00" min="0" step="0.01" />
+                </td>
+                <td class="p-1">
                     <x-text-input type="number" name="items[${itemIndex}][basic_amount]" class="w-full basic-amount-input" value="0.00" min="0" step="0.01" readonly />
                 </td>
                 <td class="p-1">
@@ -245,8 +262,8 @@
                 <td class="p-1">
                     <x-text-input type="number" name="items[${itemIndex}][total_amount]" class="w-full total-amount-input" value="0.00" min="0" step="0.01" readonly />
                 </td>
-                <td class="p-1">
-                    <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn" title="Remove">
+                <td class="p-1 text-center" style="min-width: 100px;">
+                    <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn p-2 rounded-md border border-gray-300 inline-flex items-center justify-center" title="Remove">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </td>

@@ -136,7 +136,7 @@
             margin-top: 30px;
             text-align: center;
             font-size: 10px;
-            color: #666;
+            color:#4B5563;
         }
 
         .amount-in-words {
@@ -145,6 +145,9 @@
             color: #4B5563;
             /* Tailwind gray-600 */
             font-size: 0.9em;
+            font-weight: bold;
+            color: black;
+            
         }
     </style>
 </head>
@@ -240,6 +243,13 @@
             @endforeach
         </tbody>
     </table>
+    
+    @if ($invoice->notes)
+        <div class="notes">
+            <strong>Notes:</strong><br>
+            <p>{{ $invoice->notes }}</p>
+        </div>
+    @endif
 
     <div class="totals-section">
         <table>
@@ -251,6 +261,14 @@
                 <td>Total GST:</td>
                 <td align="right">{{ number_format($invoice->tax_amount, 2) }}</td>
             </tr>
+            <tr>
+                <td>Total Discount:</td>
+                <td align="right">{{ number_format($invoice->total_discount ?? 0, 2) }}</td>
+            </tr>
+            <tr>
+                <td>Total Scheme Amount:</td>
+                <td align="right">{{ number_format($invoice->total_scheme_amount ?? 0, 2) }}</td>
+            </tr>
             <tr class="grand-total-row">
                 <td>Grand Total:</td>
                 <td align="right">{{ number_format($invoice->total, 2) }}</td>
@@ -260,14 +278,6 @@
             Amount in words: {{ ucwords(App\Helpers\NumberToWords::convert($invoice->total)) }} Rupees Only
         </div>
     </div>
-
-    @if ($invoice->notes)
-        <div class="notes">
-            <strong>Notes:</strong><br>
-            <p>{{ $invoice->notes }}</p>
-        </div>
-    @endif
-
     <div class="footer">
         <p>This is a computer-generated invoice. No signature is required.</p>
     </div>

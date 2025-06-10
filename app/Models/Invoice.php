@@ -18,7 +18,10 @@ class Invoice extends Model
         'subtotal',
         'tax_rate',
         'tax_amount',
-        'total'
+        'total',
+        'total_discount',
+        'total_scheme_amount',
+        'notes'
     ];
 
     protected $casts = [
@@ -27,7 +30,9 @@ class Invoice extends Model
         'subtotal' => 'decimal:2',
         'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
-        'total' => 'decimal:2'
+        'total' => 'decimal:2',
+        'total_discount' => 'decimal:2',
+        'total_scheme_amount' => 'decimal:2'
     ];
 
     public function customer()

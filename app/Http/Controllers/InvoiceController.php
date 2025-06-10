@@ -106,6 +106,8 @@ class InvoiceController extends Controller
         $customers = Customer::all();
         $services = Service::all();
         
+        $invoice->load(['services.service']);
+
         // Check if we're editing a specific service
         $invoiceService = null;
         if ($request->has('edit_service')) {
@@ -140,14 +142,16 @@ class InvoiceController extends Controller
         $subtotal = 0;
         $totalGst = 0;
         $totalDiscount = 0;
+        $totalSchemeAmount = 0;
 
         foreach ($request->items as $item) {
             $subtotal += $item['basic_amount'];
             $totalGst += $item['gst_amount'];
             $totalDiscount += ($item['discount'] ?? 0);
+            $totalSchemeAmount += ($item['scheme_amount'] ?? 0);
         }
 
-        $total = $subtotal + $totalGst;
+        $total = $subtotal + $totalGst - $totalDiscount - $totalSchemeAmount;
 
         // Update invoice header details
         $invoice->update([
@@ -157,6 +161,8 @@ class InvoiceController extends Controller
             'due_date' => $validated['due_date'],
             'subtotal' => $subtotal,
             'tax_amount' => $totalGst,
+            'total_discount' => $totalDiscount,
+            'total_scheme_amount' => $totalSchemeAmount,
             'total' => $total,
             'notes' => $request->notes,
         ]);
@@ -178,6 +184,7 @@ class InvoiceController extends Controller
                         'sgst_rate' => $item['sgst'],
                         'igst_rate' => $item['igst'],
                         'discount' => $item['discount'] ?? 0,
+                        'scheme_amount' => $item['scheme_amount'] ?? 0,
                         'basic_amount' => $item['basic_amount'],
                         'gst_amount' => $item['gst_amount'],
                         'total_amount' => $item['total_amount'],
@@ -194,6 +201,7 @@ class InvoiceController extends Controller
                     'sgst_rate' => $item['sgst'],
                     'igst_rate' => $item['igst'],
                     'discount' => $item['discount'] ?? 0,
+                    'scheme_amount' => $item['scheme_amount'] ?? 0,
                     'basic_amount' => $item['basic_amount'],
                     'gst_amount' => $item['gst_amount'],
                     'total_amount' => $item['total_amount'],
