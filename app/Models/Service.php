@@ -12,11 +12,13 @@ class Service extends Model
 
     protected $fillable = [
         'name',
-        'hsn',
+        'description',
         'rate',
+        'hsn',
+        'company_id',
         'cgst_rate',
         'sgst_rate',
-        'igst_rate'
+        'igst_rate',
     ];
 
     protected $casts = [
@@ -25,4 +27,14 @@ class Service extends Model
         'sgst_rate' => 'decimal:2',
         'igst_rate' => 'decimal:2',
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function invoiceServices()
+    {
+        return $this->hasMany(InvoiceService::class);
+    }
 }

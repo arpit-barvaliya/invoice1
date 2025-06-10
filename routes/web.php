@@ -72,6 +72,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
     Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
+
+    Route::resource('company', CompanyController::class);
+    Route::post('company/{company}/switch', [CompanyController::class, 'switchCompany'])->name('company.switch');
 });
 
 require __DIR__.'/auth.php';

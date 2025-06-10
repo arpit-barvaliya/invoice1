@@ -10,12 +10,15 @@ use App\Models\Company;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+
 class InvoiceController extends Controller
 {
     public function index()
-    { 
-        $invoices = Invoice::with('customer')->latest()->paginate(10);
-        return view('invoices.index', compact('invoices'));
+    {
+        $invoices = Invoice::with(['customer', 'services'])
+            ->where('company_id', auth()->user()->company_id)->latest()->paginate(10);
+            return view('invoices.index', compact('invoices'));
     }
 
     public function create()
@@ -48,63 +51,90 @@ class InvoiceController extends Controller
             'notes' => 'nullable|string'
         ]);
 
-        // Calculate totals
-        $subtotal = 0;
-        $totalGst = 0;
-        $totalDiscount = 0;
+        // Verify customer belongs to user's company
+        $customer = Customer::where('id', $validated['customer_id'])
+            ->where('company_id', auth()->user()->company_id)
+            ->firstOrFail();
 
-        foreach ($request->items as $item) {
-            $subtotal += $item['basic_amount'];
-            $totalGst += $item['gst_amount'];
-            $totalDiscount += ($item['discount'] ?? 0);
+        // Verify all services belong to user's company
+        $serviceIds = collect($validated['items'])->pluck('service_id');
+        $services = Service::whereIn('id', $serviceIds)
+            ->where('company_id', auth()->user()->company_id)
+            ->get();
+
+        if ($services->count() !== $serviceIds->count()) {
+            return response()->json(['message' => 'One or more services not found or unauthorized'], 403);
         }
 
-        $total = $subtotal + $totalGst;
-
-        // Create invoice
-        $invoice = Invoice::create([
-            'invoice_number' => $validated['invoice_number'],
-            'customer_id' => $validated['customer_id'],
-            'invoice_date' => $validated['invoice_date'],
-            'due_date' => $validated['due_date'],
-            'subtotal' => $subtotal,
-            'tax_amount' => $totalGst,
-            'total' => $total,
-            'notes' => $request->notes,
-        ]);
-
-        // Create invoice items
-        foreach ($request->items as $item) {
-            $invoice->services()->create([
-                'service_id' => $item['service_id'],
-                'quantity' => $item['quantity'],
-                'rate' => $item['rate'],
-                'cgst_rate' => $item['cgst'],
-                'sgst_rate' => $item['sgst'],
-                'igst_rate' => $item['igst'],
-                'discount' => $item['discount'] ?? 0,
-                'scheme_amount' => $item['scheme_amount'] ?? 0,
-                'basic_amount' => $item['basic_amount'],
-                'gst_amount' => $item['gst_amount'],
-                'total_amount' => $item['total_amount']
+        DB::beginTransaction();
+        try {
+            $invoice = Invoice::create([
+                'invoice_number' => $validated['invoice_number'],
+                'customer_id' => $validated['customer_id'],
+                'invoice_date' => $validated['invoice_date'],
+                'due_date' => $validated['due_date'],
+                'notes' => $validated['notes'] ?? null,
+                'status' => 'draft',
+                'company_id' => auth()->user()->company_id,
             ]);
-        }
 
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Invoice created successfully.');
+            $subtotal = 0;
+            $totalGst = 0;
+            foreach ($validated['items'] as $item) {
+                $invoiceService = $invoice->services()->create([
+                    'service_id' => $item['service_id'],
+                    'quantity' => $item['quantity'],
+                    'rate' => $item['rate'],
+                    'cgst_rate' => $item['cgst'],
+                    'sgst_rate' => $item['sgst'],
+                    'igst_rate' => $item['igst'],
+                    'discount' => $item['discount'] ?? 0,
+                    'scheme_amount' => $item['scheme_amount'] ?? 0,
+                    'basic_amount' => $item['basic_amount'] ?? 0,
+                    'gst_amount' => $item['gst_amount'] ?? 0,
+                    'total_amount' => $item['total_amount'] ?? 0,
+                ]);
+                $subtotal += $item['basic_amount'];
+                $totalGst += $item['gst_amount'];
+            }
+
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'tax_amount' => $totalGst,
+                'total' => $subtotal + $totalGst,
+            ]);
+
+            DB::commit();
+            return redirect()->route('invoices.show', $invoice)
+                ->with('success', 'Invoice created successfully.');
+        } catch (\Exception $e) {
+            dd($e);
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating invoice: ' . $e->getMessage());
+        }
     }
 
     public function show(Invoice $invoice)
     {
-        $company = Company::first();
-        $invoice->load(['customer', 'services.service']);
-        return view('invoices.show', compact('invoice', 'company'));
+        if ($invoice->company_id !== auth()->user()->company_id) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'You do not have access to this invoice.');
+        }
+        $company = auth()->user()->company;
+        return view('invoices.show', data: compact('invoice', 'company'));
     }
 
     public function edit(Request $request, Invoice $invoice)
     {
-        $customers = Customer::all();
-        $services = Service::all();
+        if ($invoice->company_id !== auth()->user()->company_id) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'You do not have access to this invoice.');
+        }
+
+        $customers = Customer::where('company_id', auth()->user()->company_id)->get();
+        $services = Service::where('company_id', auth()->user()->company_id)->get();
         
         $invoice->load(['services.service']);
 
@@ -119,11 +149,15 @@ class InvoiceController extends Controller
 
     public function update(Request $request, Invoice $invoice)
     {
+        if ($invoice->company_id !== auth()->user()->company_id) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'You do not have access to this invoice.');
+        }
+
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
-            'invoice_number' => 'required|string|unique:invoices,invoice_number,' . $invoice->id,
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
             'items.*.quantity' => 'required|numeric|min:1',
@@ -138,93 +172,81 @@ class InvoiceController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Calculate totals from the submitted items
-        $subtotal = 0;
-        $totalGst = 0;
-        $totalDiscount = 0;
-        $totalSchemeAmount = 0;
+        // Verify customer belongs to user's company
+        $customer = Customer::where('id', $validated['customer_id'])
+            ->where('company_id', auth()->user()->company_id)
+            ->firstOrFail();
 
-        foreach ($request->items as $item) {
-            $subtotal += $item['basic_amount'];
-            $totalGst += $item['gst_amount'];
-            $totalDiscount += ($item['discount'] ?? 0);
-            $totalSchemeAmount += ($item['scheme_amount'] ?? 0);
+        // Verify all services belong to user's company
+        $serviceIds = collect($validated['items'])->pluck('service_id');
+        $services = Service::whereIn('id', $serviceIds)
+            ->where('company_id', auth()->user()->company_id)
+            ->get();
+
+        if ($services->count() !== $serviceIds->count()) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'One or more services not found or unauthorized');
         }
 
-        $total = $subtotal + $totalGst - $totalDiscount - $totalSchemeAmount;
+        DB::beginTransaction();
+        try {
+            $invoice->update([
+                'customer_id' => $validated['customer_id'],
+                'invoice_date' => $validated['invoice_date'],
+                'due_date' => $validated['due_date'],
+                'notes' => $validated['notes'] ?? null,
+                'status' => $validated['status'],
+            ]);
 
-        // Update invoice header details
-        $invoice->update([
-            'invoice_number' => $validated['invoice_number'],
-            'customer_id' => $validated['customer_id'],
-            'invoice_date' => $validated['invoice_date'],
-            'due_date' => $validated['due_date'],
-            'subtotal' => $subtotal,
-            'tax_amount' => $totalGst,
-            'total_discount' => $totalDiscount,
-            'total_scheme_amount' => $totalSchemeAmount,
-            'total' => $total,
-            'notes' => $request->notes,
-        ]);
+            // Delete existing services
+            $invoice->services()->delete();
 
-        // Get current service IDs for the invoice
-        $currentServiceIds = $invoice->services->pluck('id')->toArray();
-        $submittedServiceIds = [];
-
-        foreach ($request->items as $item) {
-            if (isset($item['id']) && !empty($item['id'])) {
-                // Update existing invoice service
-                $invoiceService = $invoice->services()->find($item['id']);
-                if ($invoiceService) {
-                    $invoiceService->update([
-                        'service_id' => $item['service_id'],
-                        'quantity' => $item['quantity'],
-                        'rate' => $item['rate'],
-                        'cgst_rate' => $item['cgst'],
-                        'sgst_rate' => $item['sgst'],
-                        'igst_rate' => $item['igst'],
-                        'discount' => $item['discount'] ?? 0,
-                        'scheme_amount' => $item['scheme_amount'] ?? 0,
-                        'basic_amount' => $item['basic_amount'],
-                        'gst_amount' => $item['gst_amount'],
-                        'total_amount' => $item['total_amount'],
-                    ]);
-                    $submittedServiceIds[] = $item['id'];
-                }
-            } else {
-                // Create new invoice service
-                $invoice->services()->create([
+            $subtotal = 0;
+            $totalGst = 0;
+            foreach ($validated['items'] as $item) {
+                $invoiceService = $invoice->services()->create([
                     'service_id' => $item['service_id'],
                     'quantity' => $item['quantity'],
                     'rate' => $item['rate'],
                     'cgst_rate' => $item['cgst'],
                     'sgst_rate' => $item['sgst'],
                     'igst_rate' => $item['igst'],
-                    'discount' => $item['discount'] ?? 0,
-                    'scheme_amount' => $item['scheme_amount'] ?? 0,
+                    'discount' => $item['discount'],
+                    'scheme_amount' => $item['scheme_amount'],
                     'basic_amount' => $item['basic_amount'],
                     'gst_amount' => $item['gst_amount'],
-                    'total_amount' => $item['total_amount'],
+                    'total_amount' => $item['total_amount']
                 ]);
+                $subtotal += $item['basic_amount'];
+                $totalGst += $item['gst_amount'];
             }
+
+            $invoice->update([
+                'subtotal' => $subtotal,
+                'tax_amount' => $totalGst,
+                'total' => $subtotal + $totalGst,
+            ]);
+
+            DB::commit();
+            return redirect()->route('invoices.show', $invoice)
+                ->with('success', 'Invoice updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating invoice: ' . $e->getMessage());
         }
-
-        // Delete services that were removed from the form
-        $servicesToDelete = array_diff($currentServiceIds, $submittedServiceIds);
-        $invoice->services()->whereIn('id', $servicesToDelete)->delete();
-
-        return redirect()->route('invoices.show', $invoice)
-            ->with('success', 'Invoice updated successfully.');
     }
 
     public function destroy(Invoice $invoice)
     {
-        // Delete related invoice services first
-        $invoice->services()->delete();
-        
-        // Force delete the invoice
-        $invoice->forceDelete();
-        
+        if ($invoice->company_id !== auth()->user()->company_id) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'You do not have access to this invoice.');
+        }
+
+        $invoice->delete();
         return redirect()->route('invoices.index')
             ->with('success', 'Invoice deleted successfully.');
     }

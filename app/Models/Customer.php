@@ -28,6 +28,21 @@ class Customer extends Model
         'gst',
         'state_code',
         'place_of_supply',
-        'credit_days'
+        'credit_days',
+        'company_id'
     ];
+
+    protected $casts = [
+        'credit_days' => 'integer',
+    ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function invoices()
+    {
+        return $this->hasMany(Invoice::class);
+    }
 }

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->string('state_code')->nullable();
             $table->string('place_of_supply')->nullable();
             $table->integer('credit_days')->default(0);
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

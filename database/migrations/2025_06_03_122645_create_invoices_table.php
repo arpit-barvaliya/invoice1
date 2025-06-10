@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2)->default(0);
             $table->text('notes')->nullable();
             $table->enum('status', ['draft', 'sent', 'paid', 'overdue'])->default('draft');
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

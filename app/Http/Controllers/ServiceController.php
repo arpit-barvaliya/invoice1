@@ -9,7 +9,7 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::latest()->paginate(10);
+        $services = Service::where('company_id', auth()->user()->company_id)->latest()->paginate(10);
         return view('services.index', compact('services'));
     }
 
@@ -20,9 +20,18 @@ class ServiceController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $this->validateService($request);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'rate' => 'required|numeric|min:0',
+            'hsn' => 'nullable|string|max:50',
+            'cgst_rate' => 'nullable',
+            'sgst_rate' => 'nullable',
+            'igst_rate' => 'nullable',
+        ]);
 
-        Service::create($validated);
+        $validated['company_id'] = auth()->user()->company_id;
+        $service = Service::create($validated);
 
         return redirect()->route('services.index')
             ->with('success', 'Service created successfully.');
@@ -30,6 +39,9 @@ class ServiceController extends Controller
 
     public function show(Service $service)
     {
+        if ($service->company_id !== auth()->user()->company_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
         return view('services.show', compact('service'));
     }
 
@@ -40,7 +52,19 @@ class ServiceController extends Controller
 
     public function update(Request $request, Service $service)
     {
-        $validated = $this->validateService($request);
+        if ($service->company_id !== auth()->user()->company_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'rate' => 'required|numeric|min:0',
+            'hsn' => 'nullable|string|max:50',
+            'cgst_rate' => 'nullable',
+            'sgst_rate' => 'nullable',
+            'igst_rate' => 'nullable',
+        ]);
 
         $service->update($validated);
 
@@ -50,6 +74,10 @@ class ServiceController extends Controller
 
     public function destroy(Service $service)
     {
+        if ($service->company_id !== auth()->user()->company_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $service->delete();
 
         return redirect()->route('services.index')

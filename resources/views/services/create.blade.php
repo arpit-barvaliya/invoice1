@@ -19,7 +19,6 @@
                                 <x-text-input id="name" type="text" name="name" :value="old('name')" class="mt-1 block w-full" required autofocus />
                                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
                             </div>
-
                             <!-- HSN -->
                             <div>
                                 <x-input-label for="hsn" :value="__('HSN Code')" />

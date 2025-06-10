@@ -16,24 +16,25 @@ class Invoice extends Model
         'invoice_date',
         'due_date',
         'subtotal',
-        'tax_rate',
         'tax_amount',
         'total',
-        'total_discount',
-        'total_scheme_amount',
-        'notes'
+        'notes',
+        'status',
+        'company_id'
     ];
 
     protected $casts = [
         'invoice_date' => 'date',
         'due_date' => 'date',
         'subtotal' => 'decimal:2',
-        'tax_rate' => 'decimal:2',
         'tax_amount' => 'decimal:2',
         'total' => 'decimal:2',
-        'total_discount' => 'decimal:2',
-        'total_scheme_amount' => 'decimal:2'
     ];
+
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
 
     public function customer()
     {
