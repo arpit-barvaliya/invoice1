@@ -15,8 +15,17 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('company.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                    @if(session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                            <span class="block sm:inline">{{ session('error') }}</span>
+                        </div>
+                    @endif
+
+                    <form action="{{ route($company ? 'company.update' : 'company.store', $company ? ['company' => $company->id] : []) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
                         @csrf
+                        @if($company)
+                            @method('PUT')
+                        @endif
                         
                         <!-- Logo Upload -->
                         <div>
@@ -31,6 +40,9 @@
                                     file:text-sm file:font-semibold
                                     file:bg-blue-50 file:text-blue-700
                                     hover:file:bg-blue-100">
+                                @error('logo')
+                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                @enderror
                             </div>
                         </div>
 

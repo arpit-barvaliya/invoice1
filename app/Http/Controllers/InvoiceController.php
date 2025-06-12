@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class InvoiceController extends Controller
 {
@@ -23,8 +25,8 @@ class InvoiceController extends Controller
 
     public function create()
     {
-        $customers = Customer::all();
-        $services = Service::all();
+        $customers = Customer::where('company_id', auth()->user()->company_id)->get();
+        $services = Service::where('company_id', auth()->user()->company_id)->get();
         $invoiceNumber = $this->generateInvoiceNumber();
         return view('invoices.create', compact('customers', 'services', 'invoiceNumber'));
     }
@@ -35,7 +37,7 @@ class InvoiceController extends Controller
             'customer_id' => 'required|exists:customers,id',
             'invoice_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:invoice_date',
-            'invoice_number' => 'required|string|unique:invoices,invoice_number',
+            'invoice_number' => 'required|string|unique:invoices,invoice_number,NULL,id,deleted_at,NULL',
             'items' => 'required|array|min:1',
             'items.*.service_id' => 'required|exists:services,id',
             'items.*.quantity' => 'required|numeric|min:1',
@@ -43,7 +45,7 @@ class InvoiceController extends Controller
             'items.*.cgst' => 'required|numeric|min:0',
             'items.*.sgst' => 'required|numeric|min:0',
             'items.*.igst' => 'required|numeric|min:0',
-            'items.*.discount' => 'nullable|numeric|min:0',
+            'items.*.discount' => 'nullable|numeric|min:0|max:100',
             'items.*.scheme_amount' => 'nullable|numeric|min:0',
             'items.*.basic_amount' => 'required|numeric|min:0',
             'items.*.gst_amount' => 'required|numeric|min:0',
@@ -80,6 +82,8 @@ class InvoiceController extends Controller
 
             $subtotal = 0;
             $totalGst = 0;
+            $totalDiscount = 0;
+            $totalSchemeAmount = 0;
             foreach ($validated['items'] as $item) {
                 $invoiceService = $invoice->services()->create([
                     'service_id' => $item['service_id'],
@@ -96,11 +100,15 @@ class InvoiceController extends Controller
                 ]);
                 $subtotal += $item['basic_amount'];
                 $totalGst += $item['gst_amount'];
+                $totalDiscount += $item['discount'] ?? 0;
+                $totalSchemeAmount += $item['scheme_amount'] ?? 0;
             }
 
             $invoice->update([
                 'subtotal' => $subtotal,
                 'tax_amount' => $totalGst,
+                'total_discount' => $totalDiscount,
+                'total_scheme_amount' => $totalSchemeAmount,
                 'total' => $subtotal + $totalGst,
             ]);
 
@@ -108,7 +116,6 @@ class InvoiceController extends Controller
             return redirect()->route('invoices.show', $invoice)
                 ->with('success', 'Invoice created successfully.');
         } catch (\Exception $e) {
-            dd($e);
             DB::rollBack();
             return redirect()->back()
                 ->withInput()
@@ -122,8 +129,15 @@ class InvoiceController extends Controller
             return redirect()->route('invoices.index')
                 ->with('error', 'You do not have access to this invoice.');
         }
-        $company = auth()->user()->company;
-        return view('invoices.show', data: compact('invoice', 'company'));
+        
+        $company = Company::with('user')->find(auth()->user()->company_id);
+        \Log::info('Company details in invoice show', [
+            'company_id' => $company->id,
+            'logo' => $company->logo,
+            'logo_exists' => $company->logo ? Storage::disk('public')->exists($company->logo) : false
+        ]);
+        
+        return view('invoices.show', compact('invoice', 'company'));
     }
 
     public function edit(Request $request, Invoice $invoice)
@@ -165,7 +179,8 @@ class InvoiceController extends Controller
             'items.*.cgst' => 'required|numeric|min:0',
             'items.*.sgst' => 'required|numeric|min:0',
             'items.*.igst' => 'required|numeric|min:0',
-            'items.*.discount' => 'nullable|numeric|min:0',
+            'items.*.discount' => 'nullable|numeric|min:0|max:100',
+            'items.*.scheme_amount' => 'nullable|numeric|min:0',
             'items.*.basic_amount' => 'required|numeric|min:0',
             'items.*.gst_amount' => 'required|numeric|min:0',
             'items.*.total_amount' => 'required|numeric|min:0',
@@ -196,7 +211,6 @@ class InvoiceController extends Controller
                 'invoice_date' => $validated['invoice_date'],
                 'due_date' => $validated['due_date'],
                 'notes' => $validated['notes'] ?? null,
-                'status' => $validated['status'],
             ]);
 
             // Delete existing services
@@ -204,6 +218,8 @@ class InvoiceController extends Controller
 
             $subtotal = 0;
             $totalGst = 0;
+            $totalDiscount = 0;
+            $totalSchemeAmount = 0;
             foreach ($validated['items'] as $item) {
                 $invoiceService = $invoice->services()->create([
                     'service_id' => $item['service_id'],
@@ -212,19 +228,23 @@ class InvoiceController extends Controller
                     'cgst_rate' => $item['cgst'],
                     'sgst_rate' => $item['sgst'],
                     'igst_rate' => $item['igst'],
-                    'discount' => $item['discount'],
-                    'scheme_amount' => $item['scheme_amount'],
-                    'basic_amount' => $item['basic_amount'],
-                    'gst_amount' => $item['gst_amount'],
-                    'total_amount' => $item['total_amount']
+                    'discount' => $item['discount'] ?? 0,
+                    'scheme_amount' => $item['scheme_amount'] ?? 0,
+                    'basic_amount' => $item['basic_amount'] ?? 0,
+                    'gst_amount' => $item['gst_amount'] ?? 0,
+                    'total_amount' => $item['total_amount'] ?? 0,
                 ]);
                 $subtotal += $item['basic_amount'];
                 $totalGst += $item['gst_amount'];
+                $totalDiscount += $item['discount'] ?? 0;
+                $totalSchemeAmount += $item['scheme_amount'] ?? 0;
             }
 
             $invoice->update([
                 'subtotal' => $subtotal,
                 'tax_amount' => $totalGst,
+                'total_discount' => $totalDiscount,
+                'total_scheme_amount' => $totalSchemeAmount,
                 'total' => $subtotal + $totalGst,
             ]);
 
@@ -253,12 +273,57 @@ class InvoiceController extends Controller
 
     public function pdf(Invoice $invoice)
     {
-        $company = Company::first();
+        $company = auth()->user()->company;
         if ($company && $company->logo) {
             $company->logo = storage_path('app/public/' . $company->logo);
         }
         $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'company'));
         return $pdf->stream('invoice-' . str_replace(['/', '\\'], '-', $invoice->invoice_number) . '.pdf');
+    }
+
+    public function sendEmail(Invoice $invoice)
+    {
+        if ($invoice->company_id !== auth()->user()->company_id) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'You do not have access to this invoice.');
+        }
+
+        try {
+            $company = auth()->user()->company;
+            if ($company && $company->logo) {
+                $company->logo = storage_path('app/public/' . $company->logo);
+            }
+
+            // Generate PDF
+            $pdf = PDF::loadView('invoices.pdf', compact('invoice', 'company'));
+            $pdfContent = $pdf->output();
+
+            // Get customer email
+            $customerEmail = $invoice->customer->email;
+            if (!$customerEmail) {
+                return redirect()->route('invoices.index')
+                    ->with('error', 'Customer email not found.');
+            }
+
+            // Send email with PDF content
+            Mail::send('emails.invoice', [
+                'invoice' => $invoice,
+                'pdfContent' => base64_encode($pdfContent)
+            ], function ($message) use ($invoice, $customerEmail, $pdfContent) {
+                $message->to($customerEmail)
+                    ->subject('Invoice #' . $invoice->invoice_number)
+                    ->attachData($pdfContent, 'invoice.pdf', [
+                        'mime' => 'application/pdf',
+                        'as' => 'invoice.pdf'
+                    ]);
+            });
+
+            return redirect()->route('invoices.index')
+                ->with('success', 'Invoice has been sent to ' . $customerEmail);
+        } catch (\Exception $e) {
+            return redirect()->route('invoices.index')
+                ->with('error', 'Failed to send invoice: ' . $e->getMessage());
+        }
     }
 
     protected function getCurrentFinancialYear()

@@ -17,6 +17,8 @@ class Invoice extends Model
         'due_date',
         'subtotal',
         'tax_amount',
+        'total_discount',
+        'total_scheme_amount',
         'total',
         'notes',
         'status',
@@ -28,6 +30,8 @@ class Invoice extends Model
         'due_date' => 'date',
         'subtotal' => 'decimal:2',
         'tax_amount' => 'decimal:2',
+        'total_discount' => 'decimal:2',
+        'total_scheme_amount' => 'decimal:2',
         'total' => 'decimal:2',
     ];
 

@@ -1,23 +1,23 @@
 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Invoice Items</h3>
 
-    <div class="overflow-x-auto mb-4">
-        <table class="min-w-full divide-y divide-gray-200" id="invoice-items-table">
+    <div class="w-full mb-4">
+        <table class="w-full divide-y divide-gray-200" id="invoice-items-table">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 300px;">Service</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">HSN</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Rate</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Quantity</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">CGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">SGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 120px;">IGST (%)</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 150px;">Discount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Scheme Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Basic Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">GST Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 280px;">Total Amount</th>
-                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="min-width: 100px;">Actions</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">HSN</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rate</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">CGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IGST (%)</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Discount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Scheme Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Basic Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">GST Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Amount</th>
+                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -52,8 +52,13 @@
                             <td class="p-1">
                                 <x-text-input type="number" name="items[{{ $index }}][igst]" class="w-full igst-input" value="{{ old('items.' . $index . '.igst', number_format($service->igst_rate, 2, '.', '')) }}" min="0" step="0.01" required />
                             </td>
-                             <td class="p-1">
-                                <x-text-input type="number" name="items[{{ $index }}][discount]" class="w-full discount-input" value="{{ old('items.' . $index . '.discount', number_format($service->discount, 2, '.', '')) }}" min="0" step="0.01" />
+                            <td class="p-1">
+                                <div class="relative">
+                                    <x-text-input type="number" name="items[{{ $index }}][discount]" class="w-full discount-input pr-8" value="{{ old('items.' . $index . '.discount', number_format($service->discount, 2, '.', '')) }}" min="0" max="100" step="0.01" />
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <span class="text-gray-500">%</span>
+                                    </div>
+                                </div>
                             </td>
                             <td class="p-1">
                                 <x-text-input type="number" name="items[{{ $index }}][scheme_amount]" class="w-full scheme-amount-input" value="{{ old('items.' . $index . '.scheme_amount', number_format($service->scheme_amount, 2, '.', '')) }}" min="0" step="0.01" />
@@ -67,7 +72,7 @@
                             <td class="p-1">
                                 <x-text-input type="number" name="items[{{ $index }}][total_amount]" class="w-full total-amount-input" value="{{ old('items.' . $index . '.total_amount', number_format($service->total_amount, 2, '.', '')) }}" min="0" step="0.01" readonly />
                             </td>
-                            <td class="p-1 text-center" style="min-width: 100px;">
+                            <td class="p-1 text-center">
                                 <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn p-2 rounded-md border border-gray-300 inline-flex items-center justify-center" title="Remove">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
@@ -76,7 +81,7 @@
                     @endforeach
                 @endif
                 <tr id="no-items-row" class="@if(isset($invoice) && $invoice->services->count() > 0) hidden @endif">
-                    <td colspan="12" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No services added yet.</td>
+                    <td colspan="13" class="px-6 py-4 whitespace-nowrap text-center text-gray-500">No services added yet.</td>
                 </tr>
             </tbody>
         </table>
@@ -140,82 +145,49 @@
             const cgst = parseFloat(row.querySelector('.cgst-input').value) || 0;
             const sgst = parseFloat(row.querySelector('.sgst-input').value) || 0;
             const igst = parseFloat(row.querySelector('.igst-input').value) || 0;
-            const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
+            const discountPercentage = parseFloat(row.querySelector('.discount-input').value) || 0;
             const schemeAmount = parseFloat(row.querySelector('.scheme-amount-input').value) || 0;
 
-            const basicAmount = quantity * rate;
-            const gstRate = cgst + sgst + igst;
-            const gstAmount = (basicAmount * gstRate) / 100;
-            const totalAmount = basicAmount + gstAmount - discount - schemeAmount;
+            const basicAmount = (rate * quantity) - (rate * quantity * discountPercentage / 100) - schemeAmount;
+            const gstAmount = basicAmount * ((cgst + sgst + igst) / 100);
+            const totalAmount = basicAmount + gstAmount;
 
             row.querySelector('.basic-amount-input').value = basicAmount.toFixed(2);
             row.querySelector('.gst-amount-input').value = gstAmount.toFixed(2);
             row.querySelector('.total-amount-input').value = totalAmount.toFixed(2);
+
+            calculateTotals();
         }
 
-        function updateTotals() {
-            let totalSubtotal = 0;
+        function calculateTotals() {
+            let subtotal = 0;
             let totalGst = 0;
             let totalDiscount = 0;
             let totalSchemeAmount = 0;
 
             document.querySelectorAll('.invoice-item-row').forEach(row => {
-                const basicAmount = parseFloat(row.querySelector('.basic-amount-input').value) || 0;
-                const gstAmount = parseFloat(row.querySelector('.gst-amount-input').value) || 0;
-                const discount = parseFloat(row.querySelector('.discount-input').value) || 0;
-                const schemeAmount = parseFloat(row.querySelector('.scheme-amount-input').value) || 0;
-
-                totalSubtotal += basicAmount;
-                totalGst += gstAmount;
-                totalDiscount += discount;
-                totalSchemeAmount += schemeAmount;
+                subtotal += parseFloat(row.querySelector('.basic-amount-input').value) || 0;
+                totalGst += parseFloat(row.querySelector('.gst-amount-input').value) || 0;
+                totalDiscount += parseFloat(row.querySelector('.discount-input').value) || 0;
+                totalSchemeAmount += parseFloat(row.querySelector('.scheme-amount-input').value) || 0;
             });
 
-            const grandTotal = totalSubtotal + totalGst - totalDiscount - totalSchemeAmount;
-
-            subtotalInput.value = totalSubtotal.toFixed(2);
+            subtotalInput.value = subtotal.toFixed(2);
             totalGstInput.value = totalGst.toFixed(2);
             totalDiscountInput.value = totalDiscount.toFixed(2);
             totalSchemeAmountInput.value = totalSchemeAmount.toFixed(2);
-            grandTotalInput.value = grandTotal.toFixed(2);
-        }
-
-        function addEventListenersToRow(row) {
-            row.querySelector('.service-select').addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const rate = selectedOption.dataset.rate || 0;
-                const hsn = selectedOption.dataset.hsn || '';
-                row.querySelector('.rate-input').value = rate;
-                row.querySelector('.hsn-input').value = hsn;
-                calculateRowAmounts(row);
-                updateTotals();
-            });
-
-            row.querySelectorAll('.quantity-input, .rate-input, .cgst-input, .sgst-input, .igst-input, .discount-input, .scheme-amount-input').forEach(input => {
-                input.addEventListener('input', function() {
-                    calculateRowAmounts(row);
-                    updateTotals();
-                });
-            });
-
-            row.querySelector('.remove-item-btn').addEventListener('click', function() {
-                row.remove();
-                if (invoiceItemsTableBody.querySelectorAll('.invoice-item-row').length === 0) {
-                    noItemsRow.classList.remove('hidden');
-                }
-                updateTotals();
-            });
+            grandTotalInput.value = (subtotal + totalGst).toFixed(2);
         }
 
         // Add event listeners to existing rows
         document.querySelectorAll('.invoice-item-row').forEach(row => {
-            addEventListenersToRow(row);
-            calculateRowAmounts(row); // Calculate initial amounts for existing rows
+            const inputs = row.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => calculateRowAmounts(row));
+            });
         });
 
-        // Initial total calculation for existing rows
-        updateTotals();
-
+        // Add row button click handler
         addRowBtn.addEventListener('click', function() {
             noItemsRow.classList.add('hidden');
             const newRow = document.createElement('tr');
@@ -248,7 +220,12 @@
                     <x-text-input type="number" name="items[${itemIndex}][igst]" class="w-full igst-input" value="0.00" min="0" step="0.01" required />
                 </td>
                 <td class="p-1">
-                    <x-text-input type="number" name="items[${itemIndex}][discount]" class="w-full discount-input" value="0.00" min="0" step="0.01" />
+                    <div class="relative">
+                        <x-text-input type="number" name="items[${itemIndex}][discount]" class="w-full discount-input pr-8" value="0.00" min="0" max="100" step="0.01" />
+                        <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <span class="text-gray-500">%</span>
+                        </div>
+                    </div>
                 </td>
                 <td class="p-1">
                     <x-text-input type="number" name="items[${itemIndex}][scheme_amount]" class="w-full scheme-amount-input" value="0.00" min="0" step="0.01" />
@@ -262,16 +239,56 @@
                 <td class="p-1">
                     <x-text-input type="number" name="items[${itemIndex}][total_amount]" class="w-full total-amount-input" value="0.00" min="0" step="0.01" readonly />
                 </td>
-                <td class="p-1 text-center" style="min-width: 100px;">
+                <td class="p-1 text-center">
                     <button type="button" class="text-red-600 hover:text-red-900 remove-item-btn p-2 rounded-md border border-gray-300 inline-flex items-center justify-center" title="Remove">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </td>
             `;
-            invoiceItemsTableBody.appendChild(newRow);
-            addEventListenersToRow(newRow);
+            invoiceItemsTableBody.insertBefore(newRow, noItemsRow);
+
+            // Add event listeners to the new row
+            const inputs = newRow.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', () => calculateRowAmounts(newRow));
+            });
+
+            // Add service select change handler
+            const serviceSelect = newRow.querySelector('.service-select');
+            serviceSelect.addEventListener('change', function() {
+                const option = this.options[this.selectedIndex];
+                const hsn = option.dataset.hsn;
+                const rate = option.dataset.rate;
+                newRow.querySelector('.hsn-input').value = hsn;
+                newRow.querySelector('.rate-input').value = rate;
+                calculateRowAmounts(newRow);
+            });
+
+            // Add remove button handler
+            const removeBtn = newRow.querySelector('.remove-item-btn');
+            removeBtn.addEventListener('click', function() {
+                if (document.querySelectorAll('.invoice-item-row').length > 1) {
+                    newRow.remove();
+                    calculateTotals();
+                } else {
+                    noItemsRow.classList.remove('hidden');
+                }
+            });
+
             itemIndex++;
-            updateTotals();
+        });
+
+        // Add remove button handlers to existing rows
+        document.querySelectorAll('.remove-item-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const row = this.closest('.invoice-item-row');
+                if (document.querySelectorAll('.invoice-item-row').length > 1) {
+                    row.remove();
+                    calculateTotals();
+                } else {
+                    noItemsRow.classList.remove('hidden');
+                }
+            });
         });
     });
 </script>

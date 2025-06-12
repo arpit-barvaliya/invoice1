@@ -100,6 +100,10 @@
                                         <span class="text-sm font-medium text-gray-700">Total Discount:</span>
                                         <span id="total-discount" class="text-sm text-gray-900">0.00</span>
                                     </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-sm font-medium text-gray-700">Scheme Amount:</span>
+                                        <span id="total-scheme-amount" class="text-sm text-gray-900">0.00</span>
+                                    </div>
                                     <div class="flex justify-between border-t pt-2">
                                         <span class="text-base font-medium text-gray-900">Grand Total:</span>
                                         <span id="grand-total" class="text-base font-medium text-gray-900">0.00</span>
@@ -317,18 +321,21 @@
                 let subtotal = 0;
                 let totalGst = 0;
                 let totalDiscount = 0;
+                let totalSchemeAmount = 0;
 
                 document.querySelectorAll('#invoice-items tr').forEach(row => {
                     subtotal += parseFloat(row.querySelector('.basic-amount').textContent) || 0;
                     totalGst += parseFloat(row.querySelector('.gst-amount').textContent) || 0;
                     totalDiscount += parseFloat(row.querySelector('input[name$="[discount]"]').value) || 0;
+                    totalSchemeAmount += parseFloat(row.querySelector('input[name$="[scheme_amount]"]').value) || 0;
                 });
 
-                const grandTotal = subtotal + totalGst;
+                const grandTotal = subtotal + totalGst - totalDiscount - totalSchemeAmount;
 
                 document.getElementById('subtotal').textContent = subtotal.toFixed(2);
                 document.getElementById('total-gst').textContent = totalGst.toFixed(2);
                 document.getElementById('total-discount').textContent = totalDiscount.toFixed(2);
+                document.getElementById('total-scheme-amount').textContent = totalSchemeAmount.toFixed(2);
                 document.getElementById('grand-total').textContent = grandTotal.toFixed(2);
             }
         });

@@ -9,6 +9,8 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\InvoiceServiceController;
 use App\Http\Controllers\CompanyController;
 
+use App\Http\Controllers\Mailcontroller;
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -64,6 +66,7 @@ Route::middleware('auth')->group(function () {
     Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
+    Route::get('/invoices/{invoice}/send-email', [InvoiceController::class, 'sendEmail'])->name('invoices.send-email');
 
     // Invoice Services Routes
     Route::post('/invoices/{invoice}/services', [InvoiceServiceController::class, 'store'])->name('invoice-services.store');
@@ -72,9 +75,12 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/company', [CompanyController::class, 'index'])->name('company.index');
     Route::post('/company', [CompanyController::class, 'store'])->name('company.store');
-
-    Route::resource('company', CompanyController::class);
+    Route::put('/company/{company}', [CompanyController::class, 'update'])->name('company.update');
+    Route::get('/company/{company}', [CompanyController::class, 'show'])->name('company.show');
+    Route::delete('/company/{company}', [CompanyController::class, 'destroy'])->name('company.destroy');
     Route::post('company/{company}/switch', [CompanyController::class, 'switchCompany'])->name('company.switch');
+
+    Route::get("send-mail",[Mailcontroller::class,"index"]);
 });
 
 require __DIR__.'/auth.php';

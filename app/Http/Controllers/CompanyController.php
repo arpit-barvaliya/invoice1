@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Company;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class CompanyController extends Controller
 {
     public function index()
     {
-        $company = Auth::user()->company ?? new Company();
+        $company = auth()->user()->company ?? new Company();
         return view('company.index', compact('company'));
     }
 
@@ -33,48 +34,54 @@ class CompanyController extends Controller
             'state_code' => 'nullable|string|max:10',
             'place_of_supply' => 'nullable|string|max:255'
         ]);
-
+    
         $data = $request->except('logo');
         $data['user_id'] = auth()->id();
-        
+    
         if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('company-logos', 'public');
+            try {
+                $file = $request->file('logo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('company-logos', $filename, 'public');
+    
+                if ($path) {
+                    $data['logo'] = $path;
+                } else {
+                    return redirect()->back()->withInput()->with('error', 'Logo upload failed.');
+                }
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Error uploading logo: ' . $e->getMessage());
+            }
         }
-
-        $company = Company::create($data);
-
-        // If this is the first company, assign it to the current user
-        if (!Auth::user()->company_id) {
-            Auth::user()->update(['company_id' => $company->id]);
+    
+        DB::beginTransaction();
+        try {
+            $company = Company::create($data);
+    
+            if (!Auth::user()->company_id) {
+                Auth::user()->update(['company_id' => $company->id]);
+            }
+    
+            DB::commit();
+            return redirect()->route('company.index')->with('success', 'Company created successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Error creating company: ' . $e->getMessage());
         }
-
-        return redirect()->route('company.index')
-            ->with('success', 'Company created successfully');
     }
-
+    
     public function show(Company $company)
     {
         if ($company->id !== Auth::user()->company_id) {
-            return redirect()->route('company.index')
-                ->with('error', 'You do not have access to this company');
+            return redirect()->route('company.index')->with('error', 'Unauthorized access.');
         }
         return view('company.show', compact('company'));
-    }
-
-    public function edit(Company $company)
-    {
-        if ($company->id !== Auth::user()->company_id) {
-            return redirect()->route('company.index')
-                ->with('error', 'You do not have access to this company');
-        }
-        return view('company.edit', compact('company'));
     }
 
     public function update(Request $request, Company $company)
     {
         if ($company->id !== Auth::user()->company_id) {
-            return redirect()->route('company.index')
-                ->with('error', 'You do not have access to this company');
+            return redirect()->route('company.index')->with('error', 'Unauthorized access.');
         }
 
         $request->validate([
@@ -92,44 +99,67 @@ class CompanyController extends Controller
         $data = $request->except('logo');
         
         if ($request->hasFile('logo')) {
-            if ($company->logo) {
-                Storage::delete($company->logo);
+            try {
+                if ($company->logo) {
+                    Storage::disk('public')->delete($company->logo);
+                }
+
+                $file = $request->file('logo');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('company-logos', $filename, 'public');
+
+                if ($path) {
+                    $data['logo'] = $path;
+                } else {
+                    return redirect()->back()->withInput()->with('error', 'Logo upload failed.');
+                }
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->with('error', 'Error uploading logo: ' . $e->getMessage());
             }
-            $data['logo'] = $request->file('logo')->store('company-logos', 'public');
         }
 
-        $company->update($data);
-
-        return redirect()->route('company.index')
-            ->with('success', 'Company updated successfully');
+        DB::beginTransaction();
+        try {
+            $company->update($data);
+            DB::commit();
+            return redirect()->route('company.index')->with('success', 'Company updated successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Error updating company: ' . $e->getMessage());
+        }
     }
 
     public function destroy(Company $company)
     {
         if ($company->id !== Auth::user()->company_id) {
-            return redirect()->route('company.index')
-                ->with('error', 'You do not have access to this company');
+            return redirect()->route('company.index')->with('error', 'Unauthorized access.');
         }
 
-        if ($company->logo) {
-            Storage::delete($company->logo);
+        DB::beginTransaction();
+        try {
+            if ($company->logo) {
+                Storage::disk('public')->delete($company->logo);
+            }
+            $company->delete();
+            DB::commit();
+            return redirect()->route('company.index')->with('success', 'Company deleted successfully.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Error deleting company: ' . $e->getMessage());
         }
-
-        $company->delete();
-
-        return redirect()->route('company.index')
-            ->with('success', 'Company deleted successfully');
     }
 
     public function switchCompany(Company $company)
     {
-        if (!Auth::user()->company_id) {
-            Auth::user()->update(['company_id' => $company->id]);
-            return redirect()->route('company.index')
-                ->with('success', 'Company switched successfully');
+        if ($company->id !== Auth::user()->company_id) {
+            return redirect()->route('company.index')->with('error', 'Unauthorized access.');
         }
-        
-        return redirect()->route('company.index')
-            ->with('error', 'You already belong to a company');
+
+        try {
+            Auth::user()->update(['company_id' => $company->id]);
+            return redirect()->route('company.index')->with('success', 'Company switched successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error switching company: ' . $e->getMessage());
+        }
     }
 } 

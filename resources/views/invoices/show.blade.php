@@ -44,8 +44,12 @@
                         <div class="border rounded-lg p-4">
                             <h3 class="text-lg font-semibold text-gray-900 mb-4">From:</h3>
                             <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                                @if($company->logo)
-                                    <img src="{{ Storage::url($company->logo) }}" alt="Company Logo" style="width: 80px; height: 80px; object-fit: contain; flex-shrink: 0;">
+                                @if($company->logo && Storage::disk('public')->exists($company->logo))
+                                    <img src="{{ Storage::url($company->logo) }}" alt="Company Logo" style="width: 80px; height: 80px; object-fit: contain; flex-shrink: 0; border: 1px solid #e5e7eb; border-radius: 4px;">
+                                @else
+                                    <div style="width: 80px; height: 80px; background-color: #f3f4f6; display: flex; align-items: center; justify-content: center; border: 1px solid #e5e7eb; border-radius: 4px;">
+                                        <span style="font-size: 24px; color: #9ca3af;">Logo</span>
+                                    </div>
                                 @endif
                                 <div style="flex-grow: 1;">
                                     <h4 class="text-lg font-semibold text-gray-900">{{ $company->name }}</h4>

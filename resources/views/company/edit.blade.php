@@ -10,7 +10,8 @@
                 </div>
 
                 <div class="card-body">
-                    <form action="{{ route('company.update', $company) }}" method="POST" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('company.store') }}" enctype="multipart/form-data">
+
                         @csrf
                         @method('PUT')
 

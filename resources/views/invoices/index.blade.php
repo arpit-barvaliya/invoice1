@@ -82,6 +82,11 @@
                                                     title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
+                                                <a href="{{ route('invoices.send-email', $invoice) }}"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition-colors duration-200"
+                                                    title="Send Email">
+                                                    <i class="fas fa-envelope"></i>
+                                                </a>
                                                 <form id="delete-form-{{ $invoice->id }}"
                                                     action="{{ route('invoices.destroy', $invoice) }}" method="POST"
                                                     class="inline">
